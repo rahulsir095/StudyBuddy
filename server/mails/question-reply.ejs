@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Reply Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background: #ffffff;
+            padding: 20px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px 10px 0 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 20px;
+            color: #333;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            margin-top: 20px;
+        }
+        .answer-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            color: white !important;
+            background: #007bff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Question Reply Notification
+        </div>
+        <div class="content">
+            <p>Hi <%= name %>,</p>
+            <p>Your question in the course <strong><%= title %></strong> has received a new reply.</p>
+            <div class="answer-box">
+                "<%= answer %>"
+            </div>
+            <p>You can view the full discussion by clicking the button below:</p>
+            <a href="<%= courseUrl %>" class="button">View Reply</a>
+        </div>
+        <div class="footer">
+            <p>Thank you for being part of our learning community!</p>
+        </div>
+    </div>
+</body>
+</html>

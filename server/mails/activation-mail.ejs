@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Verification</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        .email-wrapper {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 30px 20px;
+        }
+
+        .email-header {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2b2b2b;
+        }
+
+        .email-body {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .code-box {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 6px;
+            text-align: center;
+            background-color: #f0f4ff;
+            color: #1a73e8;
+            border-radius: 6px;
+            padding: 14px;
+            margin: 20px 0;
+        }
+
+        .expiry-text {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .support-text {
+            text-align: center;
+            font-size: 13px;
+            color: #d32f2f;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .email-wrapper {
+                margin: 20px 10px;
+                padding: 20px 15px;
+            }
+
+            .code-box {
+                font-size: 24px;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-wrapper">
+        <p class="email-header">Hello <%= user.name %>,</p>
+        <p class="email-body">
+            Welcome to <strong>StudyBuddy</strong>! We're excited to have you on board. Please verify your email address
+            using the code below:
+        </p>
+        <div class="code-box">
+            <%= activationCode %>
+        </div>
+        <p class="expiry-text">This code will expire in <strong>5 minutes</strong>.</p>
+        <p class="support-text">
+            If you didn&rsquo;t request this, you can safely ignore this message or
+            <a href="mailto:support@studybuddy.com">contact our support team</a>.
+        </p>
+    </div>
+</body>
+
+</html>
