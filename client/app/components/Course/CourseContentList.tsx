@@ -3,8 +3,16 @@ import React, { FC, useState } from "react";
 import { BsChevronUp, BsChevronDown } from "react-icons/bs";
 import { MdOutlineOndemandVideo } from "react-icons/md";
 
+interface Data {
+  _id: string;
+  title: string;
+  description: string;
+  videoSection: string;
+  videoLength?: number;
+}
+
 type Props = {
-  data: any[];
+  data: Data[];
   activeVideo?: number;
   setActiveVideo?: (id: number) => void;
   isDemo?: boolean;
@@ -21,7 +29,7 @@ const CourseContentList: FC<Props> = ({ data, activeVideo, setActiveVideo, isDem
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
 
   // Unique sections
-  const videoSections: string[] = [...new Set(data.map((item: any) => item.videoSection))];
+  const videoSections: string[] = [...new Set(data.map((item) => item.videoSection))];
 
   const toggleSection = (section: string) => {
     const updated = new Set(visibleSections);
@@ -33,18 +41,18 @@ const CourseContentList: FC<Props> = ({ data, activeVideo, setActiveVideo, isDem
     setVisibleSections(updated);
   };
 
+
   return (
     <div
       className={`mt-4 w-full ${!isDemo &&
         "ml-[-3px] min-h-screen sticky top-24 left-0 z-30 overflow-y-auto mt-[100px]"
         }`}
     >
-      {videoSections.map((section: string, sectionIndex: number) => {
-        const sectionVideos: any[] = data.filter(
-          (item: any) => item.videoSection === section
+      {videoSections.map((section, sectionIndex) => {
+        const sectionVideos: Data[] = data.filter(
+          (item: Data) => item.videoSection === section
         );
 
-        // total duration (in minutes)
         const totalMinutes = sectionVideos.reduce(
           (acc, video) => acc + (video.videoLength || 0),
           0
@@ -55,7 +63,6 @@ const CourseContentList: FC<Props> = ({ data, activeVideo, setActiveVideo, isDem
             key={`section-${sectionIndex}`}
             className={`mb-4 ${!isDemo && "border-b dark:border-[#ffffff3a] pb-3"}`}
           >
-            {/* Section Header */}
             <div
               className="w-full flex justify-between items-center cursor-pointer"
               onClick={() => toggleSection(section)}
@@ -77,12 +84,10 @@ const CourseContentList: FC<Props> = ({ data, activeVideo, setActiveVideo, isDem
               </button>
             </div>
 
-            {/* Videos inside this section */}
             {visibleSections.has(section) && (
               <div className="mt-3 space-y-3">
-                {sectionVideos.map((video: any, videoIndex: number) => {
+                {sectionVideos.map((video: Data, videoIndex: number) => {
                   const videoIndexGlobal = data.findIndex((v) => v._id === video._id);
-
                   const isActive = !isDemo && activeVideo === videoIndexGlobal;
 
                   return (
@@ -102,14 +107,15 @@ const CourseContentList: FC<Props> = ({ data, activeVideo, setActiveVideo, isDem
                       <div className="flex items-center gap-3">
                         <MdOutlineOndemandVideo
                           size={20}
-                          className={`flex-shrink-0 ${isActive ? "text-blue-600" : "text-blue-500"}`}
+                          className={`flex-shrink-0 ${isActive ? "text-blue-600" : "text-blue-500"
+                            }`}
                         />
                         <div>
                           <span className="block text-black dark:text-white">
                             {video.title}
                           </span>
                           <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {formatTime(video.videoLength)}
+                            {formatTime(video.videoLength || 0)}
                           </span>
                         </div>
                       </div>

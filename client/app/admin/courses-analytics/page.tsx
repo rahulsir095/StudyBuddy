@@ -6,9 +6,8 @@ import DashboardHero from '../../../app/components/Admin/DashboardHero';
 import CourseAnalytics from '../../components/Admin/Analytics/CourseAnalytics'
 import AdminProtected from '@/app/hooks/adminProtected';
 
-type Props = {}
 
-const page = (props: Props) => {
+const page = () => {
     return (
         <div>
             <AdminProtected>

@@ -5,9 +5,8 @@ import Heading from '../../../app/utils/Heading';
 import DashboardHero from '../../../app/components/Admin/DashboardHero';
 import EditFaq from '../../components/Admin/Users/EditFaq'
 
-type Props = {}
 
-const page = (props: Props) => {
+const page = () => {
     return (
         <div>
             <Heading

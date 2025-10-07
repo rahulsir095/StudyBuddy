@@ -6,7 +6,6 @@ import ReviewCard from '../Review/ReviewCard';
 //  Static import for Next.js Image
 import HeroImage from '../../../public/assests/Hero.png';
 
-type Props = {};
 
 export const reviews = [
     {
@@ -60,7 +59,7 @@ export const reviews = [
     }
 ];
 
-const Reviews = (props: Props) => {
+const Reviews = () => {
     return (
         
         <div className="w-[90%] 800px:w-[85%] m-auto ">

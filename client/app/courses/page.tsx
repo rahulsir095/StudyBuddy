@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useGetHeroDataQuery } from "@/redux/features/layout/layoutApi";
 import { useSearchParams } from "next/navigation";
@@ -11,9 +11,25 @@ import CoursesCard from "../components/Course/CoursesCard";
 import { useGetUsersAllCoursesQuery } from "@/redux/features/courses/coursesApi";
 import Footer from "../components/Footer/Footer";
 
-type Props = {};
+interface Course {
+  _id:string;
+  thumbnail:{
+    url:string;
+  };
+  name:string;
+  price:number;
+  ratings:number;
+  purchased:number;
+  estimatedPrice:number;
+  categories:string;
+  courseData:[];
+}
 
-const CoursesPage = (props: Props) => {
+interface Category {
+  title: string;
+}
+
+const CoursesPage = () => {
   const searchParams = useSearchParams();
   const search = searchParams?.get("title");
 
@@ -22,21 +38,21 @@ const CoursesPage = (props: Props) => {
 
   const [open, setOpen] = useState(false);
   const [route, setRoute] = useState("Login");
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [category, setCategory] = useState("All");
 
   useEffect(() => {
     if (data?.courses) {
-      let filtered = [...data.courses];
+      let filtered: Course[] = [...data.courses];
 
       if (category !== "All") {
         filtered = filtered.filter(
-          (item: any) => item.categories === category
+          (item: Course) => item.categories === category
         );
       }
 
       if (search) {
-        filtered = filtered.filter((item: any) =>
+        filtered = filtered.filter((item: Course) =>
           item.name.toLowerCase().includes(search.toLowerCase())
         );
       }
@@ -45,7 +61,7 @@ const CoursesPage = (props: Props) => {
     }
   }, [data, search, category]);
 
-  const categories = categoriesData?.layout?.categories || [];
+  const categories: Category[] = categoriesData?.layout?.categories || [];
 
   if (isLoading) {
     return <Loader />;
@@ -77,12 +93,9 @@ const CoursesPage = (props: Props) => {
         activeItem={1}
       />
 
-      {/* Main content */}
       <main className="flex-grow">
-        {/* Categories (scrollable on mobile) */}
         <div className="w-full overflow-x-auto mt-26">
           <div className="flex items-center gap-3 px-3 pb-2 min-w-max">
-            {/* All Category */}
             <div
               className={`h-[35px] ${category === "All"
                   ? "bg-red-500 text-white"
@@ -93,8 +106,7 @@ const CoursesPage = (props: Props) => {
               All
             </div>
 
-            {/* Dynamic Categories */}
-            {categories.map((item: any, index: number) => (
+            {categories.map((item: Category, index: number) => (
               <div
                 key={index}
                 className={`h-[35px] ${category === item.title
@@ -109,7 +121,6 @@ const CoursesPage = (props: Props) => {
           </div>
         </div>
 
-        {/* No Courses */}
         {courses.length === 0 ? (
           <p
             className={`${styles.label} justify-center min-h-[40vh] flex items-center text-center px-4`}
@@ -119,10 +130,9 @@ const CoursesPage = (props: Props) => {
               : "No courses found in this category. Please try another one!"}
           </p>
         ) : (
-          /* Courses Grid */
           <div className="w-full flex justify-center">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 px-4 sm:px-6 lg:px-0 mt-8 max-w-6xl w-full">
-              {courses.map((item: any, index: number) => (
+              {courses.map((item: Course, index: number) => (
                 <CoursesCard item={item} key={index} />
               ))}
             </div>
@@ -130,11 +140,9 @@ const CoursesPage = (props: Props) => {
         )}
       </main>
 
-      {/* Footer sticks to bottom */}
       <Footer />
     </div>
   );
-
 };
 
 export default CoursesPage;

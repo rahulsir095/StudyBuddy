@@ -5,9 +5,8 @@ import Heading from '../../../app/utils/Heading';
 import DashboardHero from '../../../app/components/Admin/DashboardHero';
 import AllInvoices from '@/app/components/Admin/Order/AllInvoices';
 
-type Props = {}
 
-const page = (props: Props) => {
+const Page = () => {
   return (
 <div>
       <Heading
@@ -27,4 +26,4 @@ const page = (props: Props) => {
     </div>  )
 }
 
-export default page
+export default Page

@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 import CourseContent from '../../components/Course/CourseContent';
 import Footer from '@/app/components/Footer/Footer';
-
+interface Course{
+  courseId:string;
+}
 type Props = {
   params: Promise<{ id: string }>;
 };
@@ -20,7 +22,7 @@ const Page = ({ params }: Props) => {
     if (!isLoading) {
       const isPurchased =
         data?.user?.courses?.some(
-          (item: any) => item.courseId.toString() === id.toString()
+          (item: Course) => item.courseId.toString() === id.toString()
         );
 
       if (!isPurchased || error) {
@@ -35,7 +37,7 @@ const Page = ({ params }: Props) => {
         <Loader />
       ) : (
         <div>
-          <CourseContent id={id} user ={data.user} />
+          <CourseContent id={id} user ={data?.user} />
           <Footer/>
         </div>
       )}

@@ -6,13 +6,24 @@ import { AiOutlineUnorderedList } from 'react-icons/ai';
 
 import defaultThumbnail from '../../../public/assests/client-1.jpg';
 
+interface Item { 
+  _id:string;
+  thumbnail:{
+    url:string;
+  };
+  name:string;
+  price:number;
+  ratings:number;
+  purchased:number;
+  estimatedPrice:number;
+  courseData:[];
+}
 type Props = {
-  item: any;
+  item: Item;
   isProfile?: boolean;
-  user?: any;
 };
 
-const CoursesCard: FC<Props> = ({ item, isProfile = false,user }) => {
+const CoursesCard: FC<Props> = ({ item, isProfile = false }) => {
   return (
     <Link
       href={!isProfile ? `/course/${item._id}` : `/course-access/${item._id}`}

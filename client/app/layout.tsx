@@ -1,14 +1,14 @@
-"use client";
+'use client';
 import "./globals.css";
 import { Poppins, Josefin_Sans } from "next/font/google";
 import { ThemeProvider } from "./utils/ThemeProvider";
 import { Toaster } from "react-hot-toast";
 import { Providers } from "./Provider";
 import { SessionProvider } from "next-auth/react";
-import { useLoadUserQuery } from "@/redux/features/api/apiSlice";
 import { FC, useEffect, useState } from "react";
 import Loader from "./components/Loader/Loader";
 import { socket } from "./utils/socket";
+import { useLazyRefreshTokenQuery, useLazyLoadUserQuery } from "@/redux/features/api/apiSlice";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -40,7 +40,6 @@ export default function RootLayout({
               </Mounted>
               <Toaster position="top-center" reverseOrder={false} />
             </ThemeProvider>
-
           </SessionProvider>
         </Providers>
       </body>
@@ -49,12 +48,31 @@ export default function RootLayout({
 }
 
 const Custom: FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isLoading } = useLoadUserQuery({});
-  useEffect(() => {
-    socket.on("connection", () => { });
-  })
+  const [triggerRefresh] = useLazyRefreshTokenQuery();
+  const [triggerLoadUser] = useLazyLoadUserQuery();
+  const [loading, setLoading] = useState(true);
 
-  return isLoading ? <Loader /> : <>{children}</>;
+  useEffect(() => {
+    socket.on("connection", () => {});
+
+    const hasVisited = localStorage.getItem("visited_before");
+
+    if (hasVisited) {
+      // Returning visitor → try refresh first
+      triggerRefresh().then((res) => {
+        if ("data" in res) {
+          // refresh successful → load user data
+          triggerLoadUser();
+        }
+      }).finally(() => setLoading(false));
+    } else {
+      // First-time visitor → skip refresh
+      localStorage.setItem("visited_before", "true");
+      setLoading(false);
+    }
+  }, [triggerRefresh, triggerLoadUser]);
+
+  return loading ? <Loader /> : <>{children}</>;
 };
 
 const Mounted = ({ children }: { children: React.ReactNode }) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { HiOutlineLocationMarker, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 
@@ -22,11 +23,11 @@ const Footer = () => {
         <div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Links</h2>
           <ul className="space-y-2 text-sm">
-            <li><a href="/" className="hover:text-blue-600 dark:hover:text-blue-400">Home</a></li>
-            <li><a href="/about" className="hover:text-blue-600 dark:hover:text-blue-400">About</a></li>
-            <li><a href="/courses" className="hover:text-blue-600 dark:hover:text-blue-400">Courses</a></li>
-            <li><a href="/faq" className="hover:text-blue-600 dark:hover:text-blue-400">FAQ</a></li>
-            <li><a href="/contact" className="hover:text-blue-600 dark:hover:text-blue-400">Contact</a></li>
+            <li><Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400">Home</Link></li>
+            <li><Link href="/about" className="hover:text-blue-600 dark:hover:text-blue-400">About</Link></li>
+            <li><Link href="/courses" className="hover:text-blue-600 dark:hover:text-blue-400">Courses</Link></li>
+            <li><Link href="/faq" className="hover:text-blue-600 dark:hover:text-blue-400">FAQ</Link></li>
+            <li><Link href="/contact" className="hover:text-blue-600 dark:hover:text-blue-400">Contact</Link></li>
           </ul>
         </div>
 
@@ -36,25 +37,25 @@ const Footer = () => {
           <ul className="space-y-3 text-sm">
             <li className="flex items-center space-x-2">
               <FaFacebookF size={16} />
-              <a href="https://facebook.com/studybuddy" target="_blank" className="hover:text-blue-600 dark:hover:text-blue-400">
+              <a href="https://facebook.com/studybuddy" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-blue-400">
                 /studybuddy
               </a>
             </li>
             <li className="flex items-center space-x-2">
               <FaTwitter size={16} />
-              <a href="https://twitter.com/studybuddy" target="_blank" className="hover:text-blue-600 dark:hover:text-blue-400">
+              <a href="https://twitter.com/studybuddy" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-blue-400">
                 @studybuddy
               </a>
             </li>
             <li className="flex items-center space-x-2">
               <FaInstagram size={16} />
-              <a href="https://instagram.com/studybuddy" target="_blank" className="hover:text-pink-600 dark:hover:text-pink-400">
+              <a href="https://instagram.com/studybuddy" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 dark:hover:text-pink-400">
                 @studybuddy
               </a>
             </li>
             <li className="flex items-center space-x-2">
               <FaLinkedinIn size={16} />
-              <a href="https://linkedin.com/company/studybuddy" target="_blank" className="hover:text-blue-700 dark:hover:text-blue-500">
+              <a href="https://linkedin.com/company/studybuddy" target="_blank" rel="noopener noreferrer" className="hover:text-blue-700 dark:hover:text-blue-500">
                 /studybuddy
               </a>
             </li>

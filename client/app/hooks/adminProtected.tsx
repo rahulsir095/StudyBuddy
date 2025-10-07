@@ -1,17 +1,20 @@
-'use client'
+'use client';
 import { redirect } from "next/navigation";
-import React from "react";
+import React, { ReactNode } from "react";
 import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store"; // your store type
 
 interface ProtectedProps {
-    children: React.ReactNode;
+  children: ReactNode;
 }
 
 export default function AdminProtected({ children }: ProtectedProps) {
-    const { user } = useSelector((state: any) => state.auth);
+  const user = useSelector((state: RootState) => state.auth.user);
 
-    if (user) {
-        const isAdmin = user?.role === "admin";
-        return isAdmin ? children : redirect("/");
-    }
+  if (!user || user.role !== "admin") {
+    redirect("/"); 
+    return null;
+  }
+
+  return <>{children}</>;
 }

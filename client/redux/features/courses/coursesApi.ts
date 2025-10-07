@@ -9,6 +9,7 @@ export const courseApi = apiSlice.injectEndpoints({
             body: data,
             credentials: "include" as const,
          }),
+         invalidatesTags: ["User"],
       }),
       getAllCourses: builder.query({
          query: () => ({

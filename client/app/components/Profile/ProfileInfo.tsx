@@ -11,12 +11,24 @@ import {
 import { useLoadUserQuery } from '@/redux/features/api/apiSlice';
 import toast from 'react-hot-toast';
 
+interface UserCourse {
+  courseId: string;
+}
+
+interface User {
+    _id: string;
+  name: string;
+  email:string;
+  avatar:{
+    url:string;
+  }
+  courses?: UserCourse[];
+}
 type Props = {
-  avatar: string | null;
-  user: any;
+  user: User;
 };
 
-const ProfileInfo: FC<Props> = ({ avatar, user }) => {
+const ProfileInfo: FC<Props> = ({ user }) => {
   const [name, setName] = useState(user?.name || '');
   const [loadUser, setLoadUser] = useState(false);
   const [updateAvatar, { isSuccess, error }] = useUpdateAvatarMutation();
@@ -58,16 +70,12 @@ const ProfileInfo: FC<Props> = ({ avatar, user }) => {
       <div className="flex justify-center mb-6">
         <div className="relative">
           <Image
-            src={
-              user.avatar || avatar
-                ? user.avatar?.url || avatar
-                : avatarIcon
-            }
+            src={  user.avatar?.url || avatarIcon}
             alt="User Avatar"
             width={120}
             height={120}
             priority
-            className="rounded-full object-cover w-[120px] h-[120px] border-[3px] border-[#37a39a]"
+            className="rounded-full object-cover w-[120px] h-[120px] border-[3px] border-[#5eff50b6]"
           />
           <input
             type="file"

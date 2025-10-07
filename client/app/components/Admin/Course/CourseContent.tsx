@@ -97,7 +97,7 @@ const CourseContent: FC<Props> = ({
   };
 
   const validateFields = () => {
-    for (let section of courseContentData) {
+    for (const section of courseContentData) {
       if (!section.title.trim() || !section.videoUrl.trim()) {
         toast.error("Please fill all required fields (Title & Video URL).");
         return false;
@@ -243,7 +243,7 @@ const CourseContent: FC<Props> = ({
                       Video Length (in minutes)
                     </label>
                     <input
-                      type="number"
+                      type="string"
                       value={item.videoLength}
                       onChange={(e) =>
                         handleInputChange(index, "videoLength", e.target.value)

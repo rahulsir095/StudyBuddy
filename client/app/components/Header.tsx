@@ -21,7 +21,6 @@ import {
 import toast from "react-hot-toast";
 import { useLoadUserQuery } from "@/redux/features/api/apiSlice";
 import Loader from "./Loader/Loader";
-import { redirect } from "next/navigation";
 
 type Props = {
   open: boolean;
@@ -29,16 +28,16 @@ type Props = {
   activeItem: number;
   route: string;
   setRoute: (route: string) => void;
-  disableNavigation?: boolean;
 };
 
-const Header: FC<Props> = ({ activeItem, setOpen, route, open, setRoute, disableNavigation }) => {
+const Header: FC<Props> = ({ activeItem, setOpen, route, open, setRoute }) => {
   const [active, setActive] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
   const { data } = useSession();
-  const { data: userData, isLoading, refetch } = useLoadUserQuery(undefined);
-  const [socialAuth, { isSuccess }] = useSocialAuthMutation();
-  const [logout, setLogout] = useState(false);
+
+  const { data: userData, isLoading, refetch } = useLoadUserQuery(undefined, {});
+  const [socialAuth] = useSocialAuthMutation();
+  const [logout] = useState(false);
   const { } = useLogOutQuery(undefined, { skip: !logout ? true : false });
 
   useEffect(() => {
@@ -58,11 +57,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, route, open, setRoute, disable
         }
       }
     }
-    if (data === null && isLoading && !userData && !disableNavigation) {
-      setLogout(true);
-      redirect("/");
-    }
-  }, [data, userData, isLoading]);
+  }, [data, userData, isLoading, refetch, socialAuth]);
 
   useEffect(() => {
     const handleScroll = () => setActive(window.scrollY > 85);
@@ -70,8 +65,10 @@ const Header: FC<Props> = ({ activeItem, setOpen, route, open, setRoute, disable
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleClose = (e: any) => {
-    if (e.target.id === "screen") setOpenSidebar(false);
+  const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLDivElement).id === "screen") {
+      setOpenSidebar(false);
+    }
   };
 
   return (
@@ -116,7 +113,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, route, open, setRoute, disable
                       alt="User Profile"
                       width={40}
                       height={40}
-                      className="rounded-full cursor-pointer transition-all duration-300 border-[3px] border-[#37a39a] dark:border-[#5eff50b6]"
+                      className="rounded-full cursor-pointer transition-all duration-300 border-[3px] border-[#5eff50b6]"
                     />
                   </Link>
                 ) : (
@@ -141,7 +138,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, route, open, setRoute, disable
                 <div className="flex justify-end pt-6 pr-4">
                   <CgCloseO
                     size={25}
-                    className="cursor-pointer text-red-500 dark:text-red-700"
+                    className="cursor-pointer text-red-500 dark:text-red-900"
                     onClick={() => setOpenSidebar(false)}
                   />
                 </div>
@@ -152,13 +149,13 @@ const Header: FC<Props> = ({ activeItem, setOpen, route, open, setRoute, disable
 
           {/* Auth Modals */}
           {route === "Login" && open && (
-            <CustomModal open={open} setOpen={setOpen} setRoute={setRoute} activeItem={activeItem} component={Login} refetch={refetch} />
+            <CustomModal open={open} setOpen={setOpen} setRoute={setRoute} activeItem={activeItem} Component={Login} refetch={refetch} />
           )}
           {route === "Sign-Up" && open && (
-            <CustomModal open={open} setOpen={setOpen} setRoute={setRoute} activeItem={activeItem} component={SignUp} />
+            <CustomModal open={open} setOpen={setOpen} setRoute={setRoute} activeItem={activeItem} Component={SignUp} />
           )}
           {route === "Verification" && open && (
-            <CustomModal open={open} setOpen={setOpen} setRoute={setRoute} activeItem={activeItem} component={Verification} />
+            <CustomModal open={open} setOpen={setOpen} setRoute={setRoute} activeItem={activeItem} Component={Verification} />
           )}
         </div>
       )}

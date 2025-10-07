@@ -1,12 +1,14 @@
 'use client';
 
 import { useUpdatePasswordMutation } from '@/redux/features/user/userApi';
-import React, { FC, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-
-type Props = {};
-
-const ChangePassword: FC<Props> = () => {
+interface ApiError {
+  data: {
+    message: string;
+  };
+}
+const ChangePassword = () => {
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -27,7 +29,7 @@ const ChangePassword: FC<Props> = () => {
         }
         if (error) {
             if ("data" in error) {
-                const errorData = error as any;
+                const errorData = error as ApiError;
                 toast.error(errorData.data.message);
             }
         }

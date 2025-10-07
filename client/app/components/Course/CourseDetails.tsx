@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { format } from "timeago.js";
 import Ratings from "@/app/utils/Ratings";
 import Link from "next/link";
@@ -20,37 +20,118 @@ import Avatar from "../../../public/assests/avatar.png";
 // Stripe
 import { Elements } from "@stripe/react-stripe-js";
 import CheckOutForm from "../Payment/CheckOutForm";
-import { useLoadUserQuery } from "@/redux/features/api/apiSlice";
 import { Appearance } from '@stripe/stripe-js';
 import Image from "next/image";
 import { VscVerifiedFilled } from "react-icons/vsc";
+import { Stripe } from "@stripe/stripe-js";
+interface Benefit {
+  title: string;
+}
 
-type Props = {
-  data: any;
-  stripePromise: any;
+interface Prerequisite {
+  title: string;
+}
+
+interface Reply {
+  _id: string;
+  comment: string;
+  createdAt: string;
+  user: {
+    name: string;
+    role: string;
+    avatar?: {
+      url: string;
+    };
+  };
+}
+
+interface Review {
+  _id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  user: {
+    name: string;
+    avatar?: {
+      url: string;
+    };
+  };
+  commentReplies: Reply[];
+}
+
+interface CourseVideo {
+  _id: string;
+  title: string;
+  description: string;
+  videoSection: string;
+  videoLength?: number;
+}
+
+interface CourseData {
+  _id: string;
+  name: string;
+  title?: string;
+  description?: string;
+  overview?: string;
+  demoUrl?: string;
+  price: number;
+  estimatedPrice: number;
+  purchased: number;
+  ratings: number;
+  benefits?: Benefit[];
+  prerequisites?: Prerequisite[];
+  courseData: CourseVideo[];
+  reviews?: Review[];
+}
+
+interface UserCourse {
+  courseId: string;
+}
+
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  avatar?: {
+    url: string;
+  };
+  courses?: UserCourse[];
+}
+
+interface CourseDetailsProps {
+  data: CourseData;
+  stripePromise: Promise<Stripe | null>;
   clientSecret: string;
-  setRoute: any;
-  setOpen: any;
-  user: any;
-};
+  setRoute: (route: string) => void;
+  setOpen: (open: boolean) => void;
+  user: User | null;
+}
 
-const CourseDetails = ({ data, clientSecret, stripePromise, setOpen: openAuthModel, setRoute,user }: Props) => {
+const CourseDetails: React.FC<CourseDetailsProps> = ({
+  data,
+  clientSecret,
+  stripePromise,
+  setOpen: openAuthModel,
+  setRoute,
+  user,
+}) => {
+
   const [open, setOpen] = useState(false);
   const isDarkMode =
-  typeof window !== "undefined" &&
-  document.documentElement.classList.contains("dark");
-  const appearance:Appearance = {
-  theme: isDarkMode ? "night" : "stripe",
-  variables: {
-    colorBackground: isDarkMode ? "#0f172a" : "#ffffff",
-    colorPrimaryText: isDarkMode ? "#ffffff" : "#0f172a",
-    colorText: isDarkMode ? "#e5e7eb" : "#374151",
-    colorDanger: "#f87171",
-    fontFamily: "Poppins, sans-serif",
-  },
-};
+    typeof window !== "undefined" &&
+    document.documentElement.classList.contains("dark");
+  const appearance: Appearance = {
+    theme: isDarkMode ? "night" : "stripe",
+    variables: {
+      colorBackground: isDarkMode ? "#0f172a" : "#ffffff",
+      colorPrimaryText: isDarkMode ? "#ffffff" : "#0f172a",
+      colorText: isDarkMode ? "#e5e7eb" : "#374151",
+      colorDanger: "#f87171",
+      fontFamily: "Poppins, sans-serif",
+    },
+  };
 
-  
+
   const discountPercentage = data?.estimatedPrice
     ? (
       ((data.estimatedPrice - data.price) / data.estimatedPrice) *
@@ -58,7 +139,10 @@ const CourseDetails = ({ data, clientSecret, stripePromise, setOpen: openAuthMod
     ).toFixed(0)
     : 0;
 
-  const isPurchased = user && user.courses?.some((item: any) => item.courseId.toString() === data._id.toString());
+  const isPurchased =
+    user && user.courses?.some(
+      (item: UserCourse) => item.courseId.toString() === data._id.toString()
+    );
 
   const handleOrder = () => {
     if (user) {
@@ -99,7 +183,7 @@ const CourseDetails = ({ data, clientSecret, stripePromise, setOpen: openAuthMod
             What you will learn from this course?
           </h2>
           <div className="mt-3">
-            {data.benefits?.map((item: any, index: number) => (
+            {data.benefits?.map((item: Benefit, index: number) => (
               <div className="w-full flex items-center py-2" key={index}>
                 <MdCheckCircle
                   size={20}
@@ -115,7 +199,7 @@ const CourseDetails = ({ data, clientSecret, stripePromise, setOpen: openAuthMod
             What are the prerequisites for starting this course?
           </h2>
           <div className="mt-3">
-            {data.prerequisites?.map((item: any, index: number) => (
+            {data.prerequisites?.map((item: Prerequisite, index: number) => (
               <div className="w-full flex items-center py-2" key={index}>
                 <RiBook2Line
                   size={20}
@@ -151,7 +235,7 @@ const CourseDetails = ({ data, clientSecret, stripePromise, setOpen: openAuthMod
           </h2>
           <div className="mt-4">
             {data?.reviews && data.reviews.length > 0 ? (
-              [...data.reviews].reverse().map((review: any, i: number) => (
+              [...data.reviews].reverse().map((review: Review, i: number) => (
                 <div
                   key={i}
                   className="w-full border-gray-300 dark:border-gray-600 py-4"
@@ -180,7 +264,7 @@ const CourseDetails = ({ data, clientSecret, stripePromise, setOpen: openAuthMod
                       </small>
                     </div>
                   </div>
-                  {review.commentReplies.map((i: any, index: number) => (
+                  {review.commentReplies.map((i: Reply, index: number) => (
                     <div key={index} className="w-full flex ml-16 my-5">
                       {/* Avatar */}
                       <div className="w-[50px] h-[50px]">
@@ -295,16 +379,16 @@ const CourseDetails = ({ data, clientSecret, stripePromise, setOpen: openAuthMod
 
             {/* Stripe Checkout */}
             <div className="w-full mt-3">
-              {stripePromise && clientSecret &&(
-                <Elements stripe={stripePromise} options={{ clientSecret,appearance }}>
-                  <CheckOutForm setOpen={setOpen} data={data} user ={user} />
+              {stripePromise && clientSecret && (
+                <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
+                  <CheckOutForm setOpen={setOpen} data={data} user={user || undefined} />
                 </Elements>
               )}
             </div>
           </div>
         </div>
       )}
-      
+
     </>
   );
 };

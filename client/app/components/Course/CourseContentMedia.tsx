@@ -11,74 +11,181 @@ import Image from "next/image";
 import Avatar from "../../../public/assests/avatar.png";
 import { styles } from "@/app/styles/style";
 import toast from "react-hot-toast";
-import { useAddAnsInQuestionMutation, useAddNewQuestionMutation, useAddReplyInReviewMutation, useAddReviewInCourseMutation, useGetCourseDetailsQuery } from "@/redux/features/courses/coursesApi";
+import {
+  useAddAnsInQuestionMutation,
+  useAddNewQuestionMutation,
+  useAddReplyInReviewMutation,
+  useAddReviewInCourseMutation,
+  useGetCourseDetailsQuery,
+} from "@/redux/features/courses/coursesApi";
 import { format } from "timeago.js";
 import { BiMessage } from "react-icons/bi";
 import { VscVerifiedFilled } from "react-icons/vsc";
 import { socket } from "@/app/utils/socket";
+import CourseContentListMobile from "./CourseContentListMobile";
 
-type Props = {
-  data: any;
+// --- Types ---
+interface User {
+  _id: string;
+  name: string;
+  role: string;
+  avatar?: { url: string } | null;
+}
+interface Link {
+  title?: string;
+  url: string;
+}
+
+
+interface Reply {
+  user: User;
+  answer: string;
+  createdAt: string;
+  comment: string;
+}
+
+interface QuestionReply {
+  user: User;
+  answer: string;
+  createdAt?: string;
+}
+
+interface Question {
+  _id: string;
+  user: User;
+  question: string;
+  questionReplies: QuestionReply[];
+  createdAt?: string;
+}
+
+interface Review {
+  _id: string;
+  user: User;
+  rating: number;
+  comment: string;
+  commentReplies: Reply[];
+  createdAt?: string;
+}
+
+interface VideoContent {
+  _id: string;
+  title: string;
+  videoUrl: string;
+  description: string;
+  videoSection: string;
+  videoLength: number;
+  links?: { title?: string; url: string }[];
+  questions?: Question[];
+}
+
+interface Course {
+  _id: string;
+  reviews: Review[];
+}
+
+interface Props {
+  data: VideoContent[];
   activeVideo: number;
   setActiveVideo: (activeVideo: number) => void;
   id: string;
-  user: any;
-  refetch: any;
-};
+  user: User;
+  refetch: () => void;
+}
 
-const CourseContentMedia = ({
+// --- Component ---
+const CourseContentMedia: React.FC<Props> = ({
   data,
   id,
   activeVideo,
   setActiveVideo,
   user,
   refetch,
-}: Props) => {
+}) => {
   const [activeBar, setActiveBar] = useState<number>(0);
   const [question, setQuestion] = useState("");
   const [reviewText, setReviewText] = useState("");
   const [rating, setRating] = useState(1);
   const [answer, setAnswer] = useState("");
   const [questionId, setQuestionId] = useState("");
-  const [reviews, setReviews] = useState<any[]>(data?.reviews || []);
-  const [reply, setReply] = useState("");
   const [reviewId, setReviewId] = useState("");
-  const [addNewQuestion, { isSuccess, error, isLoading: questionCreationLoading },] = useAddNewQuestionMutation({});
-  const [addAnsInQuestion, { isLoading: answerCreationLoadnig }] = useAddAnsInQuestionMutation();
-  const [addReviewInCourse, { isLoading: isreviewLoading }] = useAddReviewInCourseMutation();
-  const { data: courseData, refetch: reviewRefetch } = useGetCourseDetailsQuery(id, { refetchOnMountOrArgChange: true });
-  const [addReplyInReview, { isSuccess: replySuccess, error: replyError, isLoading: replyLoading }] = useAddReplyInReviewMutation({});
-  const course = courseData?.course;
-  const isReviewExists = course?.reviews.find(
-    (item: any) => (item.user._id === user._id)
+  const [reply, setReply] = useState("");
+  const [addNewQuestion, { isSuccess, error, isLoading: questionCreationLoading }] =
+    useAddNewQuestionMutation();
+  const [addAnsInQuestion] = useAddAnsInQuestionMutation();
+  const [addReviewInCourse, { isLoading: isreviewLoading }] =
+    useAddReviewInCourseMutation();
+  const { data: courseData, refetch: reviewRefetch } = useGetCourseDetailsQuery(id, {
+    refetchOnMountOrArgChange: true,
+  });
+  const [addReplyInReview] = useAddReplyInReviewMutation();
 
-  );
+  const course: Course | undefined = courseData?.course;
+  const isReviewExists = course?.reviews.some((item) => item.user._id === user._id);
+
+  // --- Handlers ---
   const handleQuestion = () => {
-    if (question.length === 0) {
-      toast.error("Question can't be empty.");
-    } else {
-      addNewQuestion({
-        question,
+    if (!question.trim()) return toast.error("Question can't be empty.");
+    addNewQuestion({
+      question,
+      courseId: id,
+      contentId: data[activeVideo]._id,
+    });
+  };
+
+  const handleAnswerSubmit = async () => {
+    if (!answer.trim()) return toast.error("Answer can't be empty!");
+    try {
+      await addAnsInQuestion({
+        answer,
         courseId: id,
         contentId: data[activeVideo]._id,
+        questionId,
+      }).unwrap();
+      setAnswer("");
+      toast.success("Answer submitted successfully!");
+      refetch();
+      socket.emit("notification", {
+        title: "New question reply received.",
+        message: `You have a new question reply in ${data[activeVideo].title}`,
+        userId: user._id,
       });
+    } catch (err: unknown) {
+      const error = err as { data?: { message?: string } };
+      toast.error(error?.data?.message || "Failed to submit answer");
     }
   };
-  const handleReviewReplySubmit = async () => {
+
+  const handleReviewSubmit = async () => {
+    if (!rating || !reviewText.trim())
+      return toast.error("Please give a rating and write a review!");
+
     try {
-      if (!reply.trim()) {
-        toast.error("Reply can't be empty!");
-        return;
-      }
+      await addReviewInCourse({ review: reviewText, rating, courseId: id }).unwrap();
+      setReviewText("");
+      setRating(0);
+      reviewRefetch();
+      toast.success("Review submitted successfully!");
+      socket.emit("notification", {
+        title: "New review received.",
+        message: `A new user gave review in ${data[activeVideo].title}`,
+        userId: user._id,
+      });
+    } catch (err: unknown) {
+      const error = err as { data?: { message?: string } };
+      toast.error(error.data?.message || "Failed to update categories");
+    }
+  };
 
-      await addReplyInReview({ comment: reply, reviewId, courseId: id }).unwrap();
-
-      setReply("");  // clear input
+  const handleReviewReplySubmit = async () => {
+    if (!reviewId || !answer.trim()) return toast.error("Reply can't be empty!");
+    try {
+      await addReplyInReview({ comment: answer, reviewId, courseId: id }).unwrap();
+      setAnswer("");
       setReviewId("");
       toast.success("Reply submitted successfully!");
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.data?.message || "Failed to submit reply");
+    } catch (err: unknown) {
+      const error = err as { data?: { message?: string } };
+      toast.error(error.data?.message || "Failed to update categories");
     }
   };
 
@@ -87,49 +194,25 @@ const CourseContentMedia = ({
       setQuestion("");
       refetch();
       toast.success("Question Added Successfully!");
+    }
+    if (error && "data" in error) {
+      const errorMsg = error.data as { message: string };
+      toast.error(errorMsg.message);
+    }
+  }, [isSuccess, error, refetch]);
+
+  useEffect(()=>{
+    if(isSuccess){
       socket.emit("notification", {
         title: "New question received.",
         message: `You have a new question in ${data[activeVideo].title}`,
         userId: user._id,
       });
     }
-    if (error) {
-      if ("data" in error) {
-        const errorMsg = error.data as any;
-        toast.error(errorMsg.message);
-      }
-    }
-  }, [isSuccess, refetch, error]);
+  },[isSuccess,activeVideo,data,user._id]);
 
-  const handleAnswerSubmit = async () => {
-    if (!answer.trim()) return toast.error("Answer can't be empty!");
-
-    try {
-      await addAnsInQuestion({
-        answer,
-        courseId: id,
-        contentId: data[activeVideo]._id,
-        questionId,
-      }).unwrap();
-
-      setAnswer(""); // clear input
-      toast.success("Answer submitted successfully!");
-      refetch();
-      socket.emit("notification", {
-        title: "New question reply received.",
-        message: `You have a new question reply in ${data[activeVideo].title}`,
-        userId: user._id,
-      });
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.data?.message || "Failed to submit answer");
-    }
-  };
-
-
-  // star rating renderer
-  const renderStars = () => {
-    return Array.from({ length: 5 }, (_, index) => {
+  const renderStars = () =>
+    Array.from({ length: 5 }, (_, index) => {
       const starValue = index + 1;
       return (
         <span
@@ -145,39 +228,6 @@ const CourseContentMedia = ({
         </span>
       );
     });
-  };
-
-  // handle review submit
-  const handleReviewSubmit = async () => {
-    if (!rating || !reviewText.trim()) {
-      toast.error("Please give a rating and write a review!");
-      return;
-    }
-
-    const newReview = {
-      user: user,
-      rating,
-      comment: reviewText,
-    };
-
-    setReviews((prev) => [newReview, ...prev]);
-    setReviewText("");
-    setRating(0);
-
-    // 🔥 Call backend API here to save review
-    try {
-      await addReviewInCourse({ review: reviewText, rating, courseId: id }).unwrap();
-      reviewRefetch();
-      toast.success("Review submitted successfully!");
-      socket.emit("notification", {
-        title: "New review received.",
-        message: `A new user gave review in ${data[activeVideo].title}`,
-        userId: user._id,
-      });
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to submit review");
-    }
-  };
 
   return (
     <>
@@ -224,7 +274,17 @@ const CourseContentMedia = ({
           {data[activeVideo]?.title}
         </h1>
         <br />
-
+        {/* Mobile: Collapsible Video List */}
+        <div className="800px:hidden">
+          <div className="max-h-[50vh] overflow-y-auto border border-gray-300 dark:border-gray-600 rounded">
+            <CourseContentListMobile
+              data={data}
+              activeVideo={activeVideo}
+              setActiveVideo={setActiveVideo}
+            />
+          </div>
+        </div>
+        <br />
         {/* Tabs */}
         <div className="w-full p-4 flex items-center justify-between bg-gray-200 dark:bg-gray-800 bg-opacity-40 backdrop-blur rounded shadow-inner">
           {["Overview", "Resources", "Q&A", "Reviews"].map((text, index) => (
@@ -253,7 +313,7 @@ const CourseContentMedia = ({
 
         {activeBar === 1 && (
           <div>
-            {data[activeVideo]?.links?.map((item: any, index: number) => (
+            {data[activeVideo]?.links?.map((item: Link, index: number) => (
               <div key={index} className="mb-5">
                 <h2 className="text-[18px] 800px:text-[20px] inline-block 
                   dark:text-gray-200 text-gray-900 font-semibold">
@@ -312,7 +372,6 @@ const CourseContentMedia = ({
               <CommentReply
                 data={data}
                 activeVideo={activeVideo}
-                user={user}
                 answer={answer}
                 setAnswer={setAnswer}
                 handleAnswerSubmit={handleAnswerSubmit}
@@ -381,7 +440,7 @@ const CourseContentMedia = ({
               {course?.reviews.length === 0 ? (
                 <p className="dark:text-gray-300 text-gray-700">No reviews yet.</p>
               ) : (
-                course?.reviews.map((rev: any, index: number) => (
+                course?.reviews.map((rev: Review, index: number) => (
                   <div
                     key={index}
                     className="mb-5 p-3 border-gray-300 dark:border-gray-600"
@@ -416,7 +475,7 @@ const CourseContentMedia = ({
                       <span
                         className={`${styles.label} !ml-10 cursor-pointer`}
                         onClick={() =>
-                          setReviewId(reviewId === rev._id ? null : rev._id)
+                          setReviewId(reviewId === rev._id ? "" : rev._id)
                         }
                       >
                         {reviewId === rev._id ? "Cancel Reply" : "Add Reply"}
@@ -443,7 +502,7 @@ const CourseContentMedia = ({
                         </button>
                       </div>
                     )}
-                    {rev.commentReplies.map((i: any, index: number) => (
+                    {rev.commentReplies.map((i: Reply, index: number) => (
                       <div key={index} className="w-full flex ml-16 my-5">
                         {/* Avatar */}
                         <div className="w-[50px] h-[50px]">
@@ -482,31 +541,35 @@ const CourseContentMedia = ({
   );
 };
 
-const CommentReply = ({
+interface CommentReplyProps {
+  data: VideoContent[];
+  activeVideo: number;
+  answer: string;
+  setAnswer: React.Dispatch<React.SetStateAction<string>>;
+  handleAnswerSubmit: () => void;
+  setQuestionId: React.Dispatch<React.SetStateAction<string>>;
+  answerCreationLoadnig?: boolean;
+}
+const CommentReply: React.FC<CommentReplyProps> = ({
   data,
   activeVideo,
   answer,
   setAnswer,
   handleAnswerSubmit,
-  user,
   setQuestionId,
   answerCreationLoadnig
-}: any) => {
+}) => {
   if (!data || !data[activeVideo]) return null;
 
   return (
     <div className="w-full my-3">
-      {data[activeVideo].questions?.map((item: any, index: number) => (
+      {data[activeVideo].questions?.map((item, index: number) => (
         <CommentItem
           key={index}
-          data={data}
-          activeVideo={activeVideo}
           item={item}
-          index={index}
           answer={answer}
           setAnswer={setAnswer}
           handleAnswerSubmit={handleAnswerSubmit}
-          user={user}
           setQuestionId={setQuestionId}
           answerCreationLoadnig={answerCreationLoadnig}
         />
@@ -515,14 +578,22 @@ const CommentReply = ({
   );
 };
 
-const CommentItem = ({
+interface CommentItemProps {
+  item: Question;
+  answer: string;
+  setAnswer: React.Dispatch<React.SetStateAction<string>>;
+  handleAnswerSubmit: () => void;
+  setQuestionId: React.Dispatch<React.SetStateAction<string>>;
+  answerCreationLoadnig?: boolean;
+}
+const CommentItem: React.FC<CommentItemProps> = ({
   item,
   answer,
   setAnswer,
   handleAnswerSubmit,
   setQuestionId,
   answerCreationLoadnig
-}: any) => {
+}) => {
   const [replyActive, setReplyActive] = useState(false);
 
   return (
@@ -557,7 +628,10 @@ const CommentItem = ({
       <div className="w-full flex">
         <span
           className="800px:pl-16 text-gray-500 dark:text-gray-400 cursor-pointer mr-2"
-          onClick={() => { setReplyActive(!replyActive), setQuestionId(item._id) }}
+          onClick={() => {
+            setReplyActive(!replyActive);
+            setQuestionId(item._id);
+          }}
         >
           {!replyActive
             ? item.questionReplies.length !== 0
@@ -577,7 +651,7 @@ const CommentItem = ({
       {/* Replies Section */}
       {replyActive && (
         <>
-          {item.questionReplies.map((reply: any, idx: number) => (
+          {item.questionReplies.map((reply, idx: number) => (
             <div
               key={idx}
               className="w-full flex 800px:ml-16 my-5 text-gray-900 dark:text-white"
@@ -609,7 +683,7 @@ const CommentItem = ({
               type="text"
               placeholder="Enter your answer..."
               value={answer}
-              onChange={(e: any) => setAnswer(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswer(e.target.value)}
               className={`block 800px:ml-12 mt-2 outline-none bg-transparent border-b border-gray-300 dark:border-gray-600 p-[5px] w-[95%] ${!answer.trim() || answerCreationLoadnig && "cursor-not-allowed"}`}
             />
             <button

@@ -11,10 +11,35 @@ import {
 } from "../../../../redux/features/courses/coursesApi";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 type Props = {
   id: string;
 };
+type CourseType = {
+  _id: string;
+  name: string;
+  description: string;
+  price: string;
+  estimatedPrice: string;
+  tags: string[];
+  category: string;
+  level: string;
+  demoUrl: string;
+  thumbnail: { url: string };
+  benefits: { title: string }[];
+  prerequisites: { title: string }[];
+  courseData: {
+    videoUrl: string;
+    title: string;
+    description: string;
+    videoSection: string;
+    videoLength: string;
+    links: { title: string; url: string }[];
+    suggestion: string;
+  }[];
+};
+
 
 const EditCourse = ({ id }: Props) => {
   const router = useRouter();
@@ -25,13 +50,14 @@ const EditCourse = ({ id }: Props) => {
     { refetchOnMountOrArgChange: true }
   );
 
-  const editCourseData = data && data.courses.find((course: any) => course._id === id);
+  const editCourseData = data && data.courses.find((course: CourseType) => course._id === id);
 
   const [active, setActive] = useState(0);
   const [courseInfo, setCourseInfo] = useState({
     name: "",
     description: "",
     price: "",
+    category: "",
     estimatedPrice: "",
     tags: [] as string[],
     level: "",
@@ -48,6 +74,7 @@ const EditCourse = ({ id }: Props) => {
       title: "",
       description: "",
       videoSection: "Untitled Section",
+      videoLength:"",
       links: [
         {
           title: "",
@@ -60,16 +87,19 @@ const EditCourse = ({ id }: Props) => {
 
   const [courseData, setCourseData] = useState({});
 
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success("Course updated successfully!");
-      router.push("/admin/courses");
+useEffect(() => {
+  if (isSuccess) {
+    toast.success("Course updated successfully!");
+    router.push("/admin/courses");
+  }
+  if (error) {
+    const err = error as FetchBaseQueryError;
+    if ("data" in err) {
+      const data = err.data as { message: string };
+      toast.error(data.message);
     }
-    if (error && "data" in error) {
-      const errorMessage = error as any;
-      toast.error(errorMessage.data.message);
-    }
-  }, [isSuccess, error, router]);
+  }
+}, [isSuccess, error, router]);
 
 
   // Pre-fill form with existing course data
@@ -79,6 +109,7 @@ const EditCourse = ({ id }: Props) => {
         name: editCourseData.name,
         description: editCourseData.description,
         price: editCourseData.price,
+        category: editCourseData.category,
         estimatedPrice: editCourseData.estimatedPrice,
         tags: editCourseData.tags,
         level: editCourseData.level,
@@ -109,6 +140,7 @@ const EditCourse = ({ id }: Props) => {
         title: c.title,
         description: c.description,
         videoSection: c.videoSection,
+        videoLength:c.videoLength,
         links: c.links.map((l) => ({
           title: l.title,
           url: l.url,
@@ -171,7 +203,7 @@ const EditCourse = ({ id }: Props) => {
 
       {/* Sidebar */}
       <div className="w-[20%] mt-[100px] h-screen fixed top-18 right-0">
-        <CourseOptions active={active} setActive={setActive} />
+        <CourseOptions active={active} />
       </div>
     </div>
   );

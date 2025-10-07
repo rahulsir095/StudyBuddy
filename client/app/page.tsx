@@ -9,11 +9,10 @@ import Reviews from "./components/Reviews/Reviews"
 import FAQ from "./components/FAQ/FAQ"
 import Footer from "./components/Footer/Footer"
 
-interface Props {}
 
-const Page: FC<Props> = () => {
+const Page: FC = () => {
   const [open, setOpen] = useState(false);
-  const [activeItem, setActiveItem] = useState(0);
+  const [activeItem] = useState(0);
   const [route, setRoute] = useState("Login");
 
   return (

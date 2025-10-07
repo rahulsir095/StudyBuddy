@@ -6,10 +6,20 @@ import CourseContentMedia from "./CourseContentMedia"
 import Header from '../Header';
 import CourseContentList from './CourseContentList';
 
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  avatar:{
+    url:string;
+  };
+  role:string;
+}
+
 type Props = {
   id: string;
-  user: any;
-}
+  user: User;
+};
 
 const CourseContent = ({ id, user }: Props) => {
   const { data: contentData, isLoading, refetch } = useGetCourseContentQuery(id, { refetchOnMountOrArgChange: true });
@@ -30,7 +40,7 @@ const CourseContent = ({ id, user }: Props) => {
           />
           <div className='w-full grid 800px:grid-cols-10'>
             <Heading
-               title={data[activeVideo]?.title || "Untitled Video"}
+              title={data[activeVideo]?.title || "Untitled Video"}
               description='Video Description'
               keywords={data[activeVideo]?.tags}
             />

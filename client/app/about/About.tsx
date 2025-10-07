@@ -1,13 +1,12 @@
 "use client";
 import React from "react";
 
-type Props = {};
 
-const About = (props: Props) => {
+const About = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
       <div className="max-w-3xl text-center">
-        <h1 className="text-4xl font-bold mb-6 text-gray-900 dark:text-white">
+        <h1 className="text-4xl font-bold mb-6 text-gray-900 dark:text-white mt-10">
           About <span className="font-extrabold bg-gradient-to-r from-blue-500 to-purple-600 text-transparent bg-clip-text">
           StudyBuddy
         </span>

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useCallback } from "react";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { ThemeSwitcher } from "@/app/utils/ThemeSwitcher";
-import { socket } from "@/app/utils/socket"; // renamed for clarity
+import { socket } from "@/app/utils/socket";
 import {
   useGetAllNotificationsQuery,
   useUpdateNotificationStatusMutation,
@@ -16,6 +16,14 @@ type Props = {
   setOpen?: (value: boolean) => void;
 };
 
+type Notification = {
+  _id: string;
+  title: string;
+  message: string;
+  status: "read" | "unread";
+  createdAt: string;
+};
+
 const DashboardHeader: FC<Props> = ({ open = false, setOpen }) => {
   const { data, refetch } = useGetAllNotificationsQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -24,35 +32,38 @@ const DashboardHeader: FC<Props> = ({ open = false, setOpen }) => {
   const [updateNotificationStatus, { isSuccess }] =
     useUpdateNotificationStatusMutation();
 
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const [audio] = useState(
-    new Audio(
-      "https://res.cloudinary.com/duneotegp/video/upload/v1758041913/notification_bowwj5.mp3"
-    )
+    () =>
+      new Audio(
+        "https://res.cloudinary.com/duneotegp/video/upload/v1758041913/notification_bowwj5.mp3"
+      )
   );
 
-  const playNotificationSound = () => {
-    audio.currentTime = 0; 
+  const playNotificationSound = useCallback(() => {
+    audio.currentTime = 0;
     audio.play().catch(() => {
       toast.error("Notification sound error.");
     });
-  };
+  }, [audio]);
 
   // Update notifications when data changes
   useEffect(() => {
     if (data) {
       setNotifications(
-        data.notifications.filter((item: any) => item.status === "unread")
+        data.notifications.filter(
+          (item: Notification) => item.status === "unread"
+        )
       );
     }
     if (isSuccess) {
       refetch();
     }
     audio.load();
-  }, [data, isSuccess]);
+  }, [data, isSuccess, refetch, audio]);
 
-  // Socket listener
+  // Socket listener for new notifications
   useEffect(() => {
     if (!socket) return;
 
@@ -66,15 +77,15 @@ const DashboardHeader: FC<Props> = ({ open = false, setOpen }) => {
     return () => {
       socket.off("newNotification", handleNewNotification);
     };
-  }, [refetch]);
+  }, [refetch, playNotificationSound]);
 
-  // Mark as read
+  // Mark notification as read
   const handleNotificationStatus = async (id: string) => {
     await updateNotificationStatus(id);
   };
 
   return (
-    <div className="w-full flex items-center justify-end p-6 fixed top-5 right-0 z-50">
+    <div className="w-[10%] flex items-center justify-end p-6 fixed top-5 right-0 z-50">
       <ThemeSwitcher />
 
       {/* Bell Icon */}
@@ -98,7 +109,7 @@ const DashboardHeader: FC<Props> = ({ open = false, setOpen }) => {
           </h5>
 
           {notifications.length > 0 ? (
-            notifications.map((item: any) => (
+            notifications.map((item: Notification) => (
               <div
                 key={item._id}
                 className="bg-[#00000013] dark:bg-[#2d3a4e] font-Poppins border-b border-gray-200 dark:border-gray-600"
@@ -112,9 +123,7 @@ const DashboardHeader: FC<Props> = ({ open = false, setOpen }) => {
                     Mark as read
                   </button>
                 </div>
-                <p className="px-2 text-black dark:text-white">
-                  {item.message}
-                </p>
+                <p className="px-2 text-black dark:text-white">{item.message}</p>
                 <p className="p-2 text-black dark:text-white text-[14px] opacity-80">
                   {format(item.createdAt)}
                 </p>

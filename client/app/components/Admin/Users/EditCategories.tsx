@@ -8,31 +8,31 @@ import { AiOutlineDelete } from "react-icons/ai";
 import toast from "react-hot-toast";
 import { IoMdAddCircle } from "react-icons/io";
 
-type CategoriesType = {
+type Category = {
   title: string;
 };
 
-const EditCategories = () => {
+const EditCategories: React.FC = () => {
   const { data, isLoading } = useGetHeroDataQuery("Categories", {
     refetchOnMountOrArgChange: true,
   });
 
   const [editLayout] = useEditLayoutMutation();
-  const [categories, setCategories] = useState<CategoriesType[]>([]);
-  const [originalCategories, setOriginalCategories] = useState<CategoriesType[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [originalCategories, setOriginalCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     if (data?.layout?.categories) {
-      setCategories(data.layout.categories);
-      setOriginalCategories(data.layout.categories);
+      setCategories(data.layout.categories as Category[]);
+      setOriginalCategories(data.layout.categories as Category[]);
     }
   }, [data]);
 
-  const areCategoriesUnchanged = () => {
+  const areCategoriesUnchanged = (): boolean => {
     return JSON.stringify(categories) === JSON.stringify(originalCategories);
   };
 
-  const hasEmptyCategory = () => {
+  const hasEmptyCategory = (): boolean => {
     return categories.some((c) => !c.title.trim());
   };
 
@@ -65,10 +65,12 @@ const EditCategories = () => {
         type: "Categories",
         categories: categories.map(({ title }) => ({ title })),
       }).unwrap();
+
       toast.success("Categories updated successfully!");
       setOriginalCategories(categories);
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to update categories");
+    } catch (err: unknown) {
+      const error = err as { data?: { message?: string } };
+      toast.error(error.data?.message || "Failed to update categories");
     }
   };
 
@@ -84,23 +86,22 @@ const EditCategories = () => {
 
           {/* Categories List */}
           <div className="mt-6 flex flex-col gap-4 items-center">
-            {categories &&
-              categories.map((item: CategoriesType, index: number) => (
-                <div key={index} className="p-3 w-full max-w-[500px]">
-                  <div className="flex items-center w-full justify-center gap-3">
-                    <input
-                      className={`${styles.input} !w-[unset] !border-none !text-[20px] text-black dark:text-white`}
-                      value={item.title}
-                      onChange={(e) => handleChange(index, e.target.value)}
-                      placeholder="Enter category title..."
-                    />
-                    <AiOutlineDelete
-                      className="dark:text-white text-black text-[20px] cursor-pointer"
-                      onClick={() => deleteCategory(index)}
-                    />
-                  </div>
+            {categories.map((category, index) => (
+              <div key={index} className="p-3 w-full max-w-[500px]">
+                <div className="flex items-center w-full justify-center gap-3">
+                  <input
+                    className={`${styles.input} !w-[unset] !border-none !text-[20px] text-black dark:text-white`}
+                    value={category.title}
+                    onChange={(e) => handleChange(index, e.target.value)}
+                    placeholder="Enter category title..."
+                  />
+                  <AiOutlineDelete
+                    className="dark:text-white text-black text-[20px] cursor-pointer"
+                    onClick={() => deleteCategory(index)}
+                  />
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
 
           {/* Add Category Button */}

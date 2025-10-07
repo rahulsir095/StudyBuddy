@@ -1,7 +1,7 @@
 "use client";
 
 import React, { FC, useEffect, useMemo, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import {
   Box,
   Button,
@@ -28,13 +28,44 @@ type Props = {
   isTeam: boolean;
 };
 
+// Define Course interface if needed
+interface Course {
+  _id: string;
+  title?: string;
+}
+
+// User interface from API
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  courses: Course[];
+  createdAt: string;
+}
+
+// DataGrid row type
+interface UserRow {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  courses: number;
+  created_at: string;
+}
+
+interface UpdateUserRolePayload {
+  id: string;
+  role: string;
+}
+
 const AllUsers: FC<Props> = ({ isTeam }) => {
   const { theme } = useTheme();
-  const [active, setActive] = useState(false); 
+  const [active, setActive] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("admin");
   const [userId, setUserId] = useState("");
-  const [open, setOpen] = useState(false); 
+  const [open, setOpen] = useState(false);
 
   const { isLoading, data, refetch } = useGetAllUsersQuery(
     {},
@@ -51,7 +82,7 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
       refetch();
     }
     if (deleteError && "data" in deleteError) {
-      const errorMessage = deleteError as any;
+      const errorMessage = deleteError as { data?: { message?: string } };
       toast.error(errorMessage.data?.message || "Failed to delete user");
     }
   }, [deleteSuccess, deleteError, refetch]);
@@ -62,31 +93,37 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
   };
 
   const handleAddMember = async () => {
-  try {
-    if (!email) {
-      toast.error("Please enter an email!");
-      return;
+    try {
+      if (!email) {
+        toast.error("Please enter an email!");
+        return;
+      }
+
+      const user: User | undefined = data?.users.find(
+        (u: User) => u.email === email
+      );
+      if (!user) {
+        toast.error("User not found!");
+        return;
+      }
+
+      const payload: UpdateUserRolePayload = { id: user._id, role };
+      await updateUserRole(payload).unwrap();
+
+      toast.success("User role updated successfully!");
+      setActive(false);
+      setEmail("");
+      setRole("admin");
+      refetch();
+    } catch (err: unknown) {
+      if (typeof err === "object" && err !== null && "data" in err) {
+        const e = err as { data?: { message?: string } };
+        toast.error(e.data?.message || "Failed to update role");
+      } else {
+        toast.error("Failed to update role");
+      }
     }
-
-    // Find user by email
-    const user = data?.users.find((u: any) => u.email === email);
-    if (!user) {
-      toast.error("User not found!");
-      return;
-    }
-
-    await updateUserRole({ id: user._id, role }).unwrap();
-
-    toast.success("User role updated successfully!");
-    setActive(false);
-    setEmail("");
-    setRole("admin");
-    refetch();
-  } catch (err: any) {
-    toast.error(err?.data?.message || "Failed to update role");
-  }
-};
-
+  };
 
   // Global theme config
   const muiTheme = useMemo(
@@ -115,7 +152,7 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
   );
 
   // DataGrid columns
-  const columns = [
+  const columns: GridColDef<UserRow>[] = [
     { field: "id", headerName: "ID", flex: 0.6 },
     { field: "name", headerName: "Name", flex: 0.6 },
     { field: "email", headerName: "Email", flex: 0.8 },
@@ -126,7 +163,7 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
       field: "emailIcon",
       headerName: "Email",
       flex: 0.2,
-      renderCell: (params: any) => (
+      renderCell: (params: GridRenderCellParams<UserRow>) => (
         <Box
           component="a"
           href={`mailto:${params.row.email}`}
@@ -150,7 +187,7 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
       field: "delete",
       headerName: "Delete",
       flex: 0.2,
-      renderCell: (params: any) => (
+      renderCell: (params: GridRenderCellParams<UserRow>) => (
         <Button
           onClick={() => {
             setOpen(true);
@@ -167,12 +204,12 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
   ];
 
   // Data rows
-  const rows: any = [];
-  const userData = isTeam
-    ? data?.users.filter((u: any) => u.role === "admin")
+  const rows: UserRow[] = [];
+  const userData: User[] | undefined = isTeam
+    ? data?.users.filter((u: User) => u.role === "admin")
     : data?.users;
 
-  userData?.forEach((item: any) =>
+  userData?.forEach((item: User) =>
     rows.push({
       id: item._id,
       name: item.name,
@@ -185,7 +222,7 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <div className="mt-[100px]">
+      <div className="mt-[100px] ml-[20px]">
         {isLoading ? (
           <Loader />
         ) : (
@@ -195,11 +232,7 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
               <Button
                 variant="contained"
                 onClick={() => setActive(true)}
-                sx={{
-                  borderRadius: "12px",
-                  px: 3,
-                  py: 1,
-                }}
+                sx={{ borderRadius: "12px", px: 3, py: 1 }}
               >
                 Add Member
               </Button>
@@ -220,23 +253,18 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
                     theme === "dark" ? "#1f2937" : "#ffffff",
                 },
                 "& .MuiDataGrid-columnHeaders": {
-                  backgroundColor: theme === "dark" ? "#1e3a8a !important" : "#3b82f6 !important",
-                },
-                "& .MuiDataGrid-columnHeader": {
-                  backgroundColor: theme === "dark" ? "#1e3a8a !important" : "#3b82f6 !important",
+                  backgroundColor:
+                    theme === "dark"
+                      ? "#1e3a8a !important"
+                      : "#3b82f6 !important",
                 },
                 "& .MuiDataGrid-columnHeaderTitle": {
                   color: "#fff",
-                  fontWeight: "600",
-                  fontSize: "15px",
+                  fontWeight: 600,
+                  fontSize: 15,
                 },
                 "& .MuiDataGrid-cell": {
                   color: theme === "dark" ? "#f3f4f6" : "#111827",
-                },
-                "& .MuiDataGrid-footerContainer": {
-                  borderTop: "none",
-                  backgroundColor: theme === "dark" ? "#1e3a8a" : "#2563eb",
-                  color: "#ffffff",
                 },
               }}
             >
@@ -249,7 +277,7 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
         <Modal open={active} onClose={() => setActive(false)}>
           <Box
             sx={{
-              position: "absolute" as "absolute",
+              position: "absolute",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
@@ -269,12 +297,8 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               sx={{ mb: 2 }}
-              InputLabelProps={{
-                style: { color: muiTheme.palette.text.secondary },
-              }}
-              InputProps={{
-                style: { color: muiTheme.palette.text.primary },
-              }}
+              InputLabelProps={{ style: { color: muiTheme.palette.text.secondary } }}
+              InputProps={{ style: { color: muiTheme.palette.text.primary } }}
             />
             <TextField
               fullWidth
@@ -283,12 +307,8 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
               value={role}
               onChange={(e) => setRole(e.target.value)}
               sx={{ mb: 3 }}
-              InputLabelProps={{
-                style: { color: muiTheme.palette.text.secondary },
-              }}
-              InputProps={{
-                style: { color: muiTheme.palette.text.primary },
-              }}
+              InputLabelProps={{ style: { color: muiTheme.palette.text.secondary } }}
+              InputProps={{ style: { color: muiTheme.palette.text.primary } }}
             >
               <MenuItem value="admin">Admin</MenuItem>
               <MenuItem value="user">User</MenuItem>
@@ -299,22 +319,14 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
                 onClick={() => setActive(false)}
                 sx={{
                   borderRadius: "12px",
-                  backgroundColor:
-                    theme === "dark" ? "#374151" : "#e5e7eb",
+                  backgroundColor: theme === "dark" ? "#374151" : "#e5e7eb",
                   color: theme === "dark" ? "#f3f4f6" : "#111827",
-                  "&:hover": {
-                    backgroundColor:
-                      theme === "dark" ? "#4b5563" : "#d1d5db",
-                  },
+                  "&:hover": { backgroundColor: theme === "dark" ? "#4b5563" : "#d1d5db" },
                 }}
               >
                 Cancel
               </Button>
-              <Button
-                variant="contained"
-                sx={{ borderRadius: "12px" }}
-                onClick={handleAddMember}
-              >
+              <Button variant="contained" sx={{ borderRadius: "12px" }} onClick={handleAddMember}>
                 Save
               </Button>
             </Box>
@@ -325,7 +337,7 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
         <Modal open={open} onClose={() => setOpen(false)}>
           <Box
             sx={{
-              position: "absolute" as "absolute",
+              position: "absolute",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
@@ -348,23 +360,14 @@ const AllUsers: FC<Props> = ({ isTeam }) => {
                 onClick={() => setOpen(false)}
                 sx={{
                   borderRadius: "12px",
-                  backgroundColor:
-                    theme === "dark" ? "#374151" : "#e5e7eb",
+                  backgroundColor: theme === "dark" ? "#374151" : "#e5e7eb",
                   color: theme === "dark" ? "#f3f4f6" : "#111827",
-                  "&:hover": {
-                    backgroundColor:
-                      theme === "dark" ? "#4b5563" : "#d1d5db",
-                  },
+                  "&:hover": { backgroundColor: theme === "dark" ? "#4b5563" : "#d1d5db" },
                 }}
               >
                 Cancel
               </Button>
-              <Button
-                variant="contained"
-                color="error"
-                sx={{ borderRadius: "12px" }}
-                onClick={() => handleDelete(userId)}
-              >
+              <Button variant="contained" color="error" sx={{ borderRadius: "12px" }} onClick={() => handleDelete(userId)}>
                 Delete
               </Button>
             </Box>

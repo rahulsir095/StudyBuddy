@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 
 export default function NotFoundPage() {
   const [open, setOpen] = useState(false);
-  const [activeItem, setActiveItem] = useState(0);
+  const [activeItem] = useState(0);
   const [route, setRoute] = useState("Login");
 
   const router = useRouter();
@@ -33,7 +33,6 @@ export default function NotFoundPage() {
         activeItem={activeItem}
         setRoute={setRoute}
         route={route}
-        disableNavigation={true}
       />
 
       {/* Main content */}

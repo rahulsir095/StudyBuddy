@@ -11,12 +11,29 @@ import { useLoadUserQuery } from "@/redux/features/api/apiSlice";
 import { styles } from "@/app/styles/style";
 import toast from "react-hot-toast";
 import { socket } from "../../utils/socket";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation"; 
 
+interface UserCourse {
+  courseId: string;
+}
+interface Data {
+    _id:string;
+    price:number;
+    name:string;
+}
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  avatar?: {
+    url: string;
+  };
+  courses?: UserCourse[];
+}
 type Props = {
     setOpen: (open: boolean) => void;
-    data: any;
-    user: any;
+    data: Data;
+    user?: User;
 };
 
 const CheckOutForm = ({ setOpen, data, user }: Props) => {
@@ -24,14 +41,10 @@ const CheckOutForm = ({ setOpen, data, user }: Props) => {
     const elements = useElements();
     const [message, setMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+    const { refetch: refetchUser } = useLoadUserQuery(undefined,{});
 
-    // order creation
     const [createOrder] = useCreateOrderMutation();
-
-    // refresh user after payment
-    const [loadUser, setLoadUser] = useState(false);
-    const { } = useLoadUserQuery(undefined, { skip: loadUser ? false : true });
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -58,16 +71,21 @@ const CheckOutForm = ({ setOpen, data, user }: Props) => {
                     payment_info: paymentIntent,
                 }).unwrap();
 
-                setLoadUser(true);
+                await refetchUser();
                 socket.emit("notification", {
                     title: "New Order",
-                    message: `You have a new rder from ${data?.name}`,
-                    userId: user._id,
-                })
+                    message: `You have a new order from ${data?.name}`,
+                    userId: user?._id,
+                });
+
                 toast.success("Payment Successful!");
-                setTimeout(() => setOpen(false), 2000);
-                redirect(`/course-access/${data._id}`);
+
+                setTimeout(() => {
+                    setOpen(false);
+                    router.push(`/course-access/${data._id}`);
+                }, 2000);
             } catch (err) {
+                console.log(err);
                 toast.error("Payment Failed");
             }
         }
@@ -77,7 +95,6 @@ const CheckOutForm = ({ setOpen, data, user }: Props) => {
 
     return (
         <form id="payment-form" onSubmit={handleSubmit} className="space-y-2">
-            {/* Stripe Authentication + Payment Inputs */}
             <LinkAuthenticationElement id="link-authentication-element" />
             <PaymentElement id="payment-element" />
 
@@ -91,7 +108,6 @@ const CheckOutForm = ({ setOpen, data, user }: Props) => {
                 </span>
             </button>
 
-            {/* Error / Success Message */}
             {message && (
                 <div
                     id="payment-message"

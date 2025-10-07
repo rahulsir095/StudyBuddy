@@ -17,26 +17,21 @@ type Props = {
   isDashboard?: boolean;
 };
 
+type OrderAnalyticsItem = {
+  name: string;
+  count: number;
+};
+
 const OrdersAnalytics: FC<Props> = ({ isDashboard }) => {
-  const {data,isLoading} = useGetOrdersAnalyticsQuery({});
+  const { data, isLoading } = useGetOrdersAnalyticsQuery({});
 
-  // Dummy data
-//   const analyticsData = [
-//     { month: "Page 1", count: 120 },
-//     { month: "Page 2", count: 200 },
-//     { month: "Page 3", count: 150 },
-//     { month: "Page 4", count: 300 },
-//     { month: "Page 5", count: 180 },
-//     { month: "Page 6", count: 250 },
-//     { month: "Page 7", count: 400 },
-//   ];
+  const analyticsData: OrderAnalyticsItem[] = [];
 
-  const analyticsData: any[] = [];
-  data &&
-    data.orders.last12Months.forEach((item: any) => {
+  if (data && data.orders?.last12Months) {
+    data.orders.last12Months.forEach((item: { month: string; count: number }) => {
       analyticsData.push({ name: item.month, count: item.count });
     });
-
+  }
 
   return (
     <>

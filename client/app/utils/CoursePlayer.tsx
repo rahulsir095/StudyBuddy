@@ -1,8 +1,8 @@
 import React, { FC } from "react";
 
 type Props = {
-  videoId: string;
-  title: string;
+  videoId?: string;
+  title?: string;
 };
 
 const CoursePlayer: FC<Props> = ({ videoId, title }) => {

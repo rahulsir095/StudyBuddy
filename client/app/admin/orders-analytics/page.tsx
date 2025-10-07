@@ -6,9 +6,8 @@ import DashboardHero from '../../../app/components/Admin/DashboardHero';
 import OrderAnalytics from '../../components/Admin/Analytics/OrderAnalytics'
 import AdminProtected from '@/app/hooks/adminProtected';
 
-type Props = {}
 
-const page = (props: Props) => {
+const Page = () => {
     return (
         <div>
             <AdminProtected>
@@ -30,4 +29,4 @@ const page = (props: Props) => {
         </div>)
 }
 
-export default page
+export default Page

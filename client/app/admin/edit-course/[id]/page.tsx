@@ -1,32 +1,33 @@
+"use client"
 import React from 'react';
 import AdminSidebar from "../../../components/Admin/sidebar/AdminSidebar";
 import Heading from '../../../../app/utils/Heading';
 import EditCourse from "../../../components/Admin/Course/EditCourse";
 import DashboardHeader from '../../../../app/components/Admin/DashboardHeader';
+import { useParams } from 'next/navigation';
 
-type Props = {};
+const Page = () => {
+  const params = useParams();
+  const id = params?.id as string;
 
-const Page = ({ params }: any) => {
-    const id = params?.id;
-    
-    return (
-        <div>
-            <Heading
-                title="Elearning - Admin"
-                description="ELearning is a platform for students to learn and get help from teachers"
-                keywords="Programming, MERN, Redux, Machine Learning"
-            />
-            <div className="flex">
-                <div className="1500px:w-[16%] w-1/5">
-                    <AdminSidebar />
-                </div>
-                <div className="w-[85%]">
-                    <DashboardHeader />
-                    <EditCourse id={id} />
-                </div>
-            </div>
+  return (
+    <div>
+      <Heading
+        title="Elearning - Admin"
+        description="ELearning is a platform for students to learn and get help from teachers"
+        keywords="Programming, MERN, Redux, Machine Learning"
+      />
+      <div className="flex">
+        <div className="1500px:w-[16%] w-1/5">
+          <AdminSidebar />
         </div>
-    );
+        <div className="w-[85%]">
+          <DashboardHeader />
+          <EditCourse id={id} />
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Page;

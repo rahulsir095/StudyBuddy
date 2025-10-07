@@ -9,13 +9,13 @@ import toast from "react-hot-toast";
 import Loader from "../../Loader/Loader";
 
 type FaqType = {
-  _id?: string;
+  _id: string;
   question: string;
   answer: string;
   active?: boolean;
 };
 
-const EditFaq = () => {
+const EditFaq: React.FC = () => {
   const { data, isLoading } = useGetHeroDataQuery("FAQ", {
     refetchOnMountOrArgChange: true,
   });
@@ -26,7 +26,7 @@ const EditFaq = () => {
   useEffect(() => {
     if (data?.layout?.faq) {
       setQuestions(
-        data.layout.faq.map((q: any) => ({
+        (data.layout.faq as FaqType[]).map((q) => ({
           ...q,
           active: false,
         }))
@@ -35,26 +35,22 @@ const EditFaq = () => {
   }, [data]);
 
   // Toggle expand/collapse
-  const toggleQuestion = (id?: string) => {
+  const toggleQuestion = (id: string) => {
     setQuestions((prev) =>
       prev.map((q) => (q._id === id ? { ...q, active: !q.active } : q))
     );
   };
 
   // Handle input changes
-  const handleQuestionChange = (id?: string, value?: string) => {
+  const handleQuestionChange = (id: string, value: string) => {
     setQuestions((prev) =>
-      prev.map((q) =>
-        q._id === id ? { ...q, question: value || "" } : q
-      )
+      prev.map((q) => (q._id === id ? { ...q, question: value } : q))
     );
   };
 
-  const handleAnswerChange = (id?: string, value?: string) => {
+  const handleAnswerChange = (id: string, value: string) => {
     setQuestions((prev) =>
-      prev.map((q) =>
-        q._id === id ? { ...q, answer: value || "" } : q
-      )
+      prev.map((q) => (q._id === id ? { ...q, answer: value } : q))
     );
   };
 
@@ -63,7 +59,7 @@ const EditFaq = () => {
     setQuestions((prev) => [
       ...prev,
       {
-        _id: Date.now().toString(), // temporary ID for UI
+        _id: Date.now().toString(),
         question: "",
         answer: "",
         active: true,
@@ -72,37 +68,24 @@ const EditFaq = () => {
   };
 
   // Delete FAQ
-  const deleteFaq = (id?: string) => {
+  const deleteFaq = (id: string) => {
     setQuestions((prev) => prev.filter((q) => q._id !== id));
   };
 
   // Helpers
-  const areQuestionsUnchanged = (
-    original: FaqType[],
-    updated: FaqType[]
-  ) => {
+  const areQuestionsUnchanged = (original: FaqType[], updated: FaqType[]) => {
     return (
       JSON.stringify(
-        original.map(({ _id, question, answer }) => ({
-          _id,
-          question,
-          answer,
-        }))
+        original.map(({ _id, question, answer }) => ({ _id, question, answer }))
       ) ===
       JSON.stringify(
-        updated.map(({ _id, question, answer }) => ({
-          _id,
-          question,
-          answer,
-        }))
+        updated.map(({ _id, question, answer }) => ({ _id, question, answer }))
       )
     );
   };
 
   const isAnyQuestionEmpty = (qs: FaqType[]) => {
-    return qs.some(
-      (q) => q.question.trim() === "" || q.answer.trim() === ""
-    );
+    return qs.some((q) => q.question.trim() === "" || q.answer.trim() === "");
   };
 
   // Save
@@ -110,16 +93,13 @@ const EditFaq = () => {
     try {
       await editLayout({
         type: "FAQ",
-        faq: questions.map(({ _id, question, answer }) => ({
-          _id,
-          question,
-          answer,
-        })),
+        faq: questions.map(({ _id, question, answer }) => ({ _id, question, answer })),
       }).unwrap();
 
       toast.success("FAQs updated successfully!");
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to update FAQs");
+    } catch (err: unknown) {
+      const error = err as { data?: { message?: string } };
+      toast.error(error.data?.message || "Failed to update FAQs");
     }
   };
 
@@ -131,11 +111,11 @@ const EditFaq = () => {
         <div className="w-[90%] 800px:w-[80%] m-auto mt-[120px]">
           <div className="mt-12">
             <dl className="space-y-8">
-              {questions.map((q, index) => (
+              {questions.map((q) => (
                 <div
                   key={q._id}
                   className={`${
-                    index !== 0 ? "border-t" : ""
+                    questions.indexOf(q) !== 0 ? "border-t" : ""
                   } border-gray-600 pt-6`}
                 >
                   <dt className="text-lg">
@@ -146,9 +126,7 @@ const EditFaq = () => {
                       <input
                         className="p-2 w-full rounded focus:border-transparent focus:outline-none text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                         value={q.question}
-                        onChange={(e) =>
-                          handleQuestionChange(q._id, e.target.value)
-                        }
+                        onChange={(e) => handleQuestionChange(q._id, e.target.value)}
                         placeholder="Add your question..."
                       />
                       <span className="ml-6 flex-shrink-0">
@@ -166,9 +144,7 @@ const EditFaq = () => {
                       <input
                         className="p-2 w-full rounded focus:border-transparent focus:outline-none text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                         value={q.answer}
-                        onChange={(e) =>
-                          handleAnswerChange(q._id, e.target.value)
-                        }
+                        onChange={(e) => handleAnswerChange(q._id, e.target.value)}
                         placeholder="Add your answer..."
                       />
                       <AiOutlineDelete
@@ -193,13 +169,13 @@ const EditFaq = () => {
             <div
               className={`w-[120px] h-[48px] flex items-center justify-center rounded absolute bottom-12 right-12 
               ${
-                areQuestionsUnchanged(data?.layout?.faq || [], questions) ||
+                areQuestionsUnchanged(data?.layout?.faq as FaqType[] || [], questions) ||
                 isAnyQuestionEmpty(questions)
                   ? "cursor-not-allowed bg-gray-400"
                   : "cursor-pointer bg-[#42d383]"
               }`}
               onClick={
-                areQuestionsUnchanged(data?.layout?.faq || [], questions) ||
+                areQuestionsUnchanged(data?.layout?.faq as FaqType[] || [], questions) ||
                 isAnyQuestionEmpty(questions)
                   ? undefined
                   : handleSave

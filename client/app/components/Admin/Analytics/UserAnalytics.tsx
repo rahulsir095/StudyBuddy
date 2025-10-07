@@ -15,26 +15,21 @@ type Props = {
   isDashboard?: boolean;
 };
 
+type UserAnalyticsItem = {
+  name: string;
+  count: number;
+};
+
 const UserAnalytics: FC<Props> = ({ isDashboard }) => {
   const { data, isLoading } = useGetUsersAnalyticsQuery({});
 
-  // Dummy fallback data
-//   const analyticsData = [
-//     { name: "Jun 2023", count: 300 },
-//     { name: "July 2023", count: 90 },
-//     { name: "Aug 2023", count: 400 },
-//     { name: "Sept 2023", count: 500 },
-//     { name: "Oct 2023", count: 800 },
-//     { name: "Nov 2023", count: 200 },
-//     { name: "Dec 2023", count: 700 },
-//   ];
+  const analyticsData: UserAnalyticsItem[] = [];
 
-  // Example if API data comes:
-  const analyticsData: any[] = [];
-  data &&
-    data.users.last12Months.forEach((item: any) => {
+  if (data && data.users?.last12Months) {
+    data.users.last12Months.forEach((item: { month: string; count: number }) => {
       analyticsData.push({ name: item.month, count: item.count });
     });
+  }
 
   return (
     <>

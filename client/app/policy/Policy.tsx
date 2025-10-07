@@ -1,9 +1,8 @@
 "use client";
 import React from "react";
 
-type Props = {};
 
-const Policy = (props: Props) => {
+const Policy = () => {
   return (
     <div className="min-h-screen flex flex-col items-center px-6 py-12 bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 mt-[80px]">
       <div className="max-w-4xl w-full">

@@ -4,22 +4,37 @@ import { styles } from "@/app/styles/style";
 import Ratings from "../../../utils/Ratings";
 import { IoCheckmarkDoneOutline } from "react-icons/io5";
 
-type Props = {
+// --- Types ---
+interface Benefit {
+  title: string;
+}
+
+interface CourseData {
+  demoUrl?: string;
+  title?: string;
+  name?: string;
+  price?: string;
+  estimatedPrice?: string;
+  description?: string;
+  benefits?: Benefit[];
+}
+
+interface Props {
   active: number;
   setActive: (active: number) => void;
-  courseData: any;
-  handleCourseCreate: any;
-  isEdit: boolean
-};
+  courseData: CourseData;
+  handleCourseCreate: () => void;
+  isEdit: boolean;
+}
 
+// --- Component ---
 const CoursePreview: FC<Props> = ({
   courseData,
   handleCourseCreate,
   active,
   setActive,
-  isEdit
+  isEdit,
 }) => {
-  // Calculate discount
   const price = parseFloat(courseData?.price || "0");
   const estimatedPrice = parseFloat(courseData?.estimatedPrice || "0");
 
@@ -37,10 +52,7 @@ const CoursePreview: FC<Props> = ({
       {/* Video Preview */}
       <div className="w-full relative">
         <div className="w-full mt-10">
-          <CoursePlayer
-            videoId={courseData?.demoUrl}
-            title={courseData?.title}
-          />
+          <CoursePlayer videoId={courseData?.demoUrl || ""} title={courseData?.title || ""} />
         </div>
 
         {/* Price Section */}
@@ -51,7 +63,7 @@ const CoursePreview: FC<Props> = ({
 
           {courseData?.estimatedPrice && (
             <h5 className="text-[20px] mt-2 line-through opacity-70 text-gray-600 dark:text-gray-400">
-              ₹{courseData?.estimatedPrice}
+              ₹{courseData.estimatedPrice}
             </h5>
           )}
 
@@ -65,8 +77,9 @@ const CoursePreview: FC<Props> = ({
         {/* Buy Now Button */}
         <div className="flex items-center">
           <div
-            className={`${styles.button} !w-[150px] my-3 font-Poppins text-center ${price > 0 ? "!bg-crimson cursor-pointer" : "!bg-gray-500 cursor-not-allowed"
-              }`}
+            className={`${styles.button} !w-[150px] my-3 font-Poppins text-center ${
+              price > 0 ? "!bg-crimson cursor-pointer" : "!bg-gray-500 cursor-not-allowed"
+            }`}
           >
             Buy Now {price === 0 ? "Free" : `₹${price}`}
           </div>
@@ -88,7 +101,6 @@ const CoursePreview: FC<Props> = ({
             Apply
           </button>
         </div>
-
 
         {/* Features List */}
         <ul className="list-disc list-inside space-y-1 mt-4 text-gray-800 dark:text-gray-300">
@@ -122,14 +134,12 @@ const CoursePreview: FC<Props> = ({
         </div>
 
         {/* Benefits */}
-        {courseData?.benefits?.map((item: any, index: number) => (
+        {courseData?.benefits?.map((item, index) => (
           <div className="w-full flex items-start py-2" key={index}>
             <div className="w-[20px] mr-2 flex-shrink-0">
               <IoCheckmarkDoneOutline size={20} className="text-green-500" />
             </div>
-            <p className="pl-1 text-gray-800 dark:text-gray-300">
-              {item.title}
-            </p>
+            <p className="pl-1 text-gray-800 dark:text-gray-300">{item.title}</p>
           </div>
         ))}
       </div>
@@ -146,6 +156,7 @@ const CoursePreview: FC<Props> = ({
           {courseData?.description}
         </p>
       </div>
+
       <div className="flex justify-between mt-8">
         {/* Previous Button */}
         <button

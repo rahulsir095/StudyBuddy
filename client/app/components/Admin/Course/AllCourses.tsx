@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import {
   Box,
   Button,
@@ -13,21 +13,43 @@ import {
 import { AiOutlineDelete } from "react-icons/ai";
 import { FiEdit2 } from "react-icons/fi";
 import { useTheme } from "next-themes";
-import { useDeleteCourseMutation, useGetAllCoursesQuery } from "@/redux/features/courses/coursesApi";
+import {
+  useDeleteCourseMutation,
+  useGetAllCoursesQuery,
+} from "@/redux/features/courses/coursesApi";
 import { format } from "timeago.js";
 import Loader from "../../Loader/Loader";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
+// ✅ Define proper Course type
+interface Course {
+  _id: string;
+  name: string;
+  ratings: number;
+  purchased: number;
+  createdAt: string;
+}
+
+interface RowData {
+  id: string;
+  title: string;
+  rating: number;
+  purchased: number;
+  createdAt: string;
+}
+
 const AllCourses = () => {
   const { theme } = useTheme();
   const [openDelete, setOpenDelete] = useState(false);
   const [courseId, setCourseId] = useState("");
-  const { isLoading, data,refetch } = useGetAllCoursesQuery({},
-    { refetchOnMountOrArgChange: true });
-  const [deleteCourse,{isSuccess,error}] = useDeleteCourseMutation();
+  const { isLoading, data, refetch } = useGetAllCoursesQuery(
+    {},
+    { refetchOnMountOrArgChange: true }
+  );
+  const [deleteCourse, { isSuccess, error }] = useDeleteCourseMutation();
 
-  // Theme
+  // ✅ MUI Theme (No change)
   const muiTheme = useMemo(
     () =>
       createTheme({
@@ -53,8 +75,8 @@ const AllCourses = () => {
     [theme]
   );
 
-
-  const columns = [
+  // ✅ Properly typed columns
+  const columns: GridColDef<RowData>[] = [
     { field: "id", headerName: "ID", flex: 0.6 },
     { field: "title", headerName: "Course Title", flex: 1 },
     { field: "rating", headerName: "Ratings", flex: 0.5 },
@@ -64,23 +86,22 @@ const AllCourses = () => {
       field: "edit",
       headerName: "Edit",
       flex: 0.3,
-      renderCell: (params: any) => (
-  <Box className="flex items-center justify-center w-full h-full">
-    <Link href={`/admin/edit-course/${params.row.id}`}>
-      <FiEdit2
-        size={20}
-        className={theme === "dark" ? "text-white" : "text-black"}
-      />
-    </Link>
-  </Box>
-),
-
+      renderCell: (params: GridRenderCellParams<RowData>) => (
+        <Box className="flex items-center justify-center w-full h-full">
+          <Link href={`/admin/edit-course/${params.row.id}`}>
+            <FiEdit2
+              size={20}
+              className={theme === "dark" ? "text-white" : "text-black"}
+            />
+          </Link>
+        </Box>
+      ),
     },
     {
       field: "delete",
       headerName: "Delete",
       flex: 0.2,
-      renderCell: (params: any) => (
+      renderCell: (params: GridRenderCellParams<RowData>) => (
         <Button
           onClick={() => {
             setCourseId(params.row.id);
@@ -96,35 +117,31 @@ const AllCourses = () => {
     },
   ];
 
-  const rows: any = [];
-  data?.courses.forEach((item: any) => {
-    rows.push({
+  // ✅ Rows with proper types
+  const rows: RowData[] =
+    data?.courses.map((item: Course) => ({
       id: item._id,
       title: item.name,
       rating: item.ratings,
       purchased: item.purchased,
       createdAt: format(item.createdAt),
-    });
-  });
+    })) || [];
 
-  useEffect(()=>{
-     if(isSuccess){
+  useEffect(() => {
+    if (isSuccess) {
       toast.success("Course Deleted Successfully.");
       refetch();
-     }
-     if(error){
-      if("data" in error){
-        const errorMessage = error as any;
-        toast.error(errorMessage.data.message);
-      }
-     }
-  },[isSuccess,error]);
+    }
+    if (error && "data" in error) {
+      const err = error as { data: { message: string } };
+      toast.error(err.data.message);
+    }
+  }, [isSuccess, error, refetch]);
 
-  const handleCourseDelete = async()=>{
-    const id = courseId;
+  const handleCourseDelete = async () => {
     setOpenDelete(false);
-    await deleteCourse(id);
-  }
+    await deleteCourse(courseId);
+  };
 
   return (
     <ThemeProvider theme={muiTheme}>
@@ -143,14 +160,13 @@ const AllCourses = () => {
                     theme === "dark"
                       ? "0px 4px 20px rgba(0,0,0,0.5)"
                       : "0px 4px 20px rgba(0,0,0,0.1)",
-                  backgroundColor:
-                    theme === "dark" ? "#1f2937" : "#ffffff",
+                  backgroundColor: theme === "dark" ? "#1f2937" : "#ffffff",
                 },
                 "& .MuiDataGrid-columnHeaders": {
-                  backgroundColor: theme === "dark" ? "#1e3a8a !important" : "#3b82f6 !important",
-                },
-                "& .MuiDataGrid-columnHeader": {
-                  backgroundColor: theme === "dark" ? "#1e3a8a !important" : "#3b82f6 !important",
+                  backgroundColor:
+                    theme === "dark"
+                      ? "#1e3a8a !important"
+                      : "#3b82f6 !important",
                 },
                 "& .MuiDataGrid-columnHeaderTitle": {
                   color: "#fff",
@@ -167,16 +183,21 @@ const AllCourses = () => {
                 },
               }}
             >
-              <DataGrid checkboxSelection rows={rows} columns={columns} showToolbar />
+              <DataGrid
+                checkboxSelection
+                rows={rows}
+                columns={columns}
+                disableRowSelectionOnClick
+              />
             </Box>
           </Box>
         )}
 
-        {/* Delete Confirmation Modal */}
+        {/* ✅ Delete Modal */}
         <Modal open={openDelete} onClose={() => setOpenDelete(false)}>
           <Box
             sx={{
-              position: "absolute" as "absolute",
+              position: "absolute", // ✅ fixed ESLint prefer-as-const error
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",

@@ -1,52 +1,83 @@
 'use client';
 import React, { FC, useState, useEffect } from 'react';
-import SideBarProfile from "./SideBarProfile"
+import SideBarProfile from "./SideBarProfile";
 import { useLogOutQuery } from '@/redux/features/auth/authApi';
 import { signOut } from 'next-auth/react';
-import ProfileInfo from './ProfileInfo'
-import ChangePasssword from './ChangePasssword'
+import ProfileInfo from './ProfileInfo';
+import ChangePasssword from './ChangePasssword';
 import toast from 'react-hot-toast';
 import { useGetUsersAllCoursesQuery } from '@/redux/features/courses/coursesApi';
 import CoursesCard from '../Course/CoursesCard';
+import { useRouter } from "next/navigation";
+
+interface Course {
+  _id:string;
+  thumbnail:{
+    url:string;
+  };
+  name:string;
+  price:number;
+  ratings:number;
+  purchased:number;
+  estimatedPrice:number;
+  courseData:[];
+}
+
+interface UserCourse {
+  courseId: string;
+}
+
+interface User {
+  _id: string;
+  name: string;
+  email:string;
+  role:string;
+  avatar: {
+    url:string;
+  };
+  courses?: UserCourse[];
+
+}
 
 type Props = {
-  user: any;
+  user: User;
 };
 
 const Profile: FC<Props> = ({ user }) => {
   const [scroll, setScroll] = useState(false);
-  const [avatar, setAvatar] = useState(null);
   const [active, setActive] = useState(1);
   const [logout, setLogout] = useState(false);
-  const [courses, setCourses] = useState<any>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const router = useRouter();
 
-  const { data,isLoading } = useGetUsersAllCoursesQuery(undefined, {});
-  const { } = useLogOutQuery(undefined, {
-    skip: !logout ? true : false,
-  });
+  const { data } = useGetUsersAllCoursesQuery(undefined, {});
+  useLogOutQuery(undefined, { skip: !logout });
 
   const logoutHandler = async () => {
     setLogout(true);
     await signOut();
     toast.success("Logout Successfully");
+    router.push("/");
   };
 
+  // Scroll listener
   useEffect(() => {
     const handleScroll = () => setScroll(window.scrollY > 85);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Filter purchased courses
   useEffect(() => {
     if (data && user?.courses) {
       const filteredCourses = user.courses
-        .map((userCourse: any) =>
-          data.courses.find((course: any) => course._id === userCourse.courseId)
+        .map((userCourse) =>
+          data.courses.find((course: Course) => course._id === userCourse.courseId)
         )
-        .filter((course: any) => course !== undefined);
+        .filter((course): course is Course => course !== undefined); 
       setCourses(filteredCourses);
     }
-  }, [data,user]);
+  }, [data, user]);
 
   return (
     <div className="w-[85%] flex mx-auto">
@@ -57,7 +88,6 @@ const Profile: FC<Props> = ({ user }) => {
       >
         <SideBarProfile
           user={user}
-          avatar={avatar}
           active={active}
           setActive={setActive}
           logoutHandler={logoutHandler}
@@ -67,7 +97,7 @@ const Profile: FC<Props> = ({ user }) => {
       {/* Profile Tabs */}
       {active === 1 && (
         <div className="w-full h-full bg-transparent mt-[130px]">
-          <ProfileInfo avatar={avatar} user={user} />
+          <ProfileInfo user={user} />
         </div>
       )}
 
@@ -80,18 +110,13 @@ const Profile: FC<Props> = ({ user }) => {
       {active === 3 && (
         <div className="w-full pl-7 px-2 800px:px-10 800px:pl-18 mt-[165px]">
           <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-            {courses && courses.length > 0 ? (
-              courses.map((item: any, index: number) => (
-                <CoursesCard
-                  key={index}
-                  item={item}
-                  user={user}
-                  isProfile={true}
-                />
+            {courses.length > 0 ? (
+              courses.map((item, index) => (
+                <CoursesCard key={index} item={item} isProfile={true} />
               ))
             ) : (
               <h1 className="text-center text-[18px] font-Poppins">
-                You don't have any purchased courses!
+                You don&apos;t have any purchased courses!
               </h1>
             )}
           </div>
