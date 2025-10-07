@@ -22,7 +22,7 @@ import Loader from "../../Loader/Loader";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
-// ✅ Define proper Course type
+//   Define proper Course type
 interface Course {
   _id: string;
   name: string;
@@ -49,7 +49,7 @@ const AllCourses = () => {
   );
   const [deleteCourse, { isSuccess, error }] = useDeleteCourseMutation();
 
-  // ✅ MUI Theme (No change)
+  //   MUI Theme (No change)
   const muiTheme = useMemo(
     () =>
       createTheme({
@@ -75,7 +75,7 @@ const AllCourses = () => {
     [theme]
   );
 
-  // ✅ Properly typed columns
+  //   Properly typed columns
   const columns: GridColDef<RowData>[] = [
     { field: "id", headerName: "ID", flex: 0.6 },
     { field: "title", headerName: "Course Title", flex: 1 },
@@ -117,7 +117,7 @@ const AllCourses = () => {
     },
   ];
 
-  // ✅ Rows with proper types
+  //   Rows with proper types
   const rows: RowData[] =
     data?.courses.map((item: Course) => ({
       id: item._id,
@@ -193,11 +193,11 @@ const AllCourses = () => {
           </Box>
         )}
 
-        {/* ✅ Delete Modal */}
+        {/*   Delete Modal */}
         <Modal open={openDelete} onClose={() => setOpenDelete(false)}>
           <Box
             sx={{
-              position: "absolute", // ✅ fixed ESLint prefer-as-const error
+              position: "absolute", //   fixed ESLint prefer-as-const error
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",

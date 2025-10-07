@@ -1,4 +1,3 @@
-// SignUp.tsx
 'use client';
 import React, { FC, useState, useEffect } from 'react';
 import { useFormik } from 'formik';
@@ -58,7 +57,7 @@ const SignUp: FC<Props> = ({ setRoute }) => {
   const { errors, touched, values, handleChange, handleSubmit } = formik;
 
   return (
-    <div className="w-full">
+    <div className="800px:w-full">
       <h1 className={`${styles.title}`}>Join to StudyBuddy</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">

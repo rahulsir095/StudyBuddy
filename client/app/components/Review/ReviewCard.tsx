@@ -24,6 +24,7 @@ const ReviewCard: FC<Props> = ({ item }) => {
           width={60}
           alt={item.name}
           className="rounded-full object-cover border border-gray-300 dark:border-slate-600"
+          loading="lazy"
         />
         <div>
           <h5 className="text-lg font-semibold text-gray-900 dark:text-white">
