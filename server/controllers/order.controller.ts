@@ -96,6 +96,14 @@ export const createOrder = catchAsyncErrors(
       course.purchased = course.purchased + 1;
       await course.save();
 
+      // ---- Update Redis Cache ----
+      const parsedCourses = await redis.get("allCourses") as any[];
+      if (parsedCourses) {
+        const updatedCourses = parsedCourses.map(c =>
+          c._id === course._id.toString() ? { ...c, purchased: (c.purchased || 0) + 1 } : c
+        );
+        await redis.set("allCourses", JSON.stringify(updatedCourses));
+      }
       // ---- Save Order ----
       newOrder(data, res, next);
     } catch (error: any) {

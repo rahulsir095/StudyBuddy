@@ -15,15 +15,14 @@ type Props = {
 const ReviewCard: FC<Props> = ({ item }) => {
   return (
     <div className="w-full h-max bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-md p-5 transition hover:shadow-lg">
-      
+
       {/* Top section with avatar + name */}
       <div className="flex items-center gap-4">
         <Image
+          loader={({ src }) => src}
           src={item.avatar}
-          height={60}
-          width={60}
           alt={item.name}
-          className="rounded-full object-cover border border-gray-300 dark:border-slate-600"
+          className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full object-cover border border-gray-300 dark:border-slate-600"
           loading="lazy"
         />
         <div>

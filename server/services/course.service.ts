@@ -1,4 +1,4 @@
-import { NextFunction, Response } from "express";
+import {  Response } from "express";
 import { catchAsyncErrors } from "../middleware/catchAsyncErrors";
 import courseModel from "../models/course.model";
 import { redis } from "../utils/redis";
