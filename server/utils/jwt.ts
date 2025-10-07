@@ -1,5 +1,4 @@
 require("dotenv").config();
-import jwt from 'jsonwebtoken';
 import { Response } from 'express';
 import { redis } from './redis';
 
@@ -7,8 +6,8 @@ interface ITokenOptions {
     expires: Date;
     maxAge: number;
     httpOnly: boolean;
-    secure?: boolean;
-    sameSite: "lax" | "strict" | "none" | undefined;
+    sameSite: "none",
+    secure:true,
 }
 
 // Parse environment variables properly
@@ -19,14 +18,16 @@ export const accessTokenOptions: ITokenOptions = {
     expires: new Date(Date.now() + accessTokenExpire * 60 * 1000),
     maxAge: accessTokenExpire * 60 * 1000,
     httpOnly: true,
-    sameSite: 'lax'
+    sameSite: "none",
+    secure:true,
 };
 
 export const refreshTokenOptions: ITokenOptions = {
     expires: new Date(Date.now() + refreshTokenExpire * 24 * 60 * 1000),
     maxAge: refreshTokenExpire * 24 * 60 * 1000,
     httpOnly: true,
-    sameSite: 'lax'
+    sameSite: "none",
+    secure:true,
 };
 
 export const sendToken = async (user: any, statusCode: number, res: Response) => {
@@ -45,14 +46,16 @@ export const sendToken = async (user: any, statusCode: number, res: Response) =>
         expires: new Date(Date.now() + accessTokenExpire * 60 * 1000),
         maxAge: accessTokenExpire * 60 * 1000,
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none",
+        secure:true,
     };
 
     const refreshTokenOptions: ITokenOptions = {
         expires: new Date(Date.now() + refreshTokenExpire * 24 * 60 * 60 * 1000),
         maxAge: refreshTokenExpire * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none",
+        secure:true,
     };
 
     res.cookie("access_token", accessToken, accessTokenOptions);
