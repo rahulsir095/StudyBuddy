@@ -14,10 +14,10 @@ import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 type CourseInfo = {
   name: string;
   description: string;
-  category: string;
+  categories: string;
   price: string;
   estimatedPrice: string;
-  tags: string[];
+  tags: string;
   level: string;
   demoUrl: string;
   thumbnail: string;
@@ -40,9 +40,9 @@ type FormattedCourseData = {
   description: string;
   price: string;
   estimatedPrice: string;
-  tags: string[];
+  tags: string;
   thumbnail: string;
-  category: string;
+  categories: string;
   level: string;
   demoUrl: string;
   totalVideos: number;
@@ -75,10 +75,10 @@ const CreateCourse = () => {
   const [courseInfo, setCourseInfo] = useState<CourseInfo>({
     name: "",
     description: "",
-    category: "",
+    categories: "",
     price: "",
     estimatedPrice: "",
-    tags: [],
+    tags: "",
     level: "",
     demoUrl: "",
     thumbnail: "",
@@ -122,7 +122,7 @@ const CreateCourse = () => {
       estimatedPrice: courseInfo.estimatedPrice,
       tags: courseInfo.tags,
       thumbnail: courseInfo.thumbnail,
-      category: courseInfo.category,
+      categories: courseInfo.categories,
       level: courseInfo.level,
       demoUrl: courseInfo.demoUrl,
       totalVideos: courseContentData.length,

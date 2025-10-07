@@ -22,8 +22,8 @@ type CourseType = {
   description: string;
   price: string;
   estimatedPrice: string;
-  tags: string[];
-  category: string;
+  tags: string;
+  categories: string;
   level: string;
   demoUrl: string;
   thumbnail: { url: string };
@@ -57,9 +57,9 @@ const EditCourse = ({ id }: Props) => {
     name: "",
     description: "",
     price: "",
-    category: "",
+    categories: "",
     estimatedPrice: "",
-    tags: [] as string[],
+    tags: "",
     level: "",
     demoUrl: "",
     thumbnail: "",
@@ -109,7 +109,7 @@ useEffect(() => {
         name: editCourseData.name,
         description: editCourseData.description,
         price: editCourseData.price,
-        category: editCourseData.category,
+        categories: editCourseData.categories,
         estimatedPrice: editCourseData.estimatedPrice,
         tags: editCourseData.tags,
         level: editCourseData.level,

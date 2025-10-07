@@ -6,10 +6,10 @@ import Image from "next/image";
 type CourseInfo = {
   name: string;
   description: string;
-  category: string;
+  categories: string;
   price: string;
   estimatedPrice: string;
-  tags: string[];
+  tags: string;
   level: string;
   demoUrl: string;
   thumbnail: string;
@@ -173,11 +173,11 @@ const CourseInformation: FC<Props> = ({
               type="text"
               id="tags"
               required
-              value={courseInfo.tags.join(", ")}
+              value={courseInfo.tags}
               onChange={(e) =>
                 setCourseInfo({
                   ...courseInfo,
-                  tags: e.target.value.split(",").map(tag => tag.trim()),
+                  tags: e.target.value,
                 })
               }
               placeholder="MERN, NEXT, Tailwind, Material UI"
@@ -193,9 +193,9 @@ const CourseInformation: FC<Props> = ({
             <select
               id="category"
               required
-              value={courseInfo.category || ""}
+              value={courseInfo.categories || ""}
               onChange={(e) =>
-                setCourseInfo({ ...courseInfo, category: e.target.value })
+                setCourseInfo({ ...courseInfo, categories: e.target.value })
               }
               className={styles.input}
             >
