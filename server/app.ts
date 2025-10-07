@@ -10,6 +10,7 @@ import notificationRouter from "./routes/notification.route";
 import analyticsRouter from "./routes/analytics.route";
 import layoutRouter from "./routes/layout.route";
 import ErrorHandler from "./utils/errorHandler";
+import rateLimit from "express-rate-limit";
 require("dotenv").config();
 
 app.use(express.json({ limit: "50mb" }));
@@ -29,6 +30,16 @@ app.get("/test", (req: Request, res: Response, next: NextFunction) => {
    });
 });
 
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	limit: 100, 
+	standardHeaders: 'draft-8', 
+	legacyHeaders: false, 
+	ipv6Subnet: 56, 
+	
+})
+
+
 //routes
 app.use("/api/v1", userRouter,courseRouter,orderRouter,notificationRouter,analyticsRouter,layoutRouter);
 
@@ -37,4 +48,7 @@ app.use("/api/v1", userRouter,courseRouter,orderRouter,notificationRouter,analyt
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
    next(new ErrorHandler(`Route ${req.originalUrl} not exists.`, 404));
 });
+
+//Middlewares
+app.use(limiter)
 app.use(errorMiddleware);

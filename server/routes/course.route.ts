@@ -35,7 +35,7 @@ courseRouter.get("/get-courses", getAllCourses);
 courseRouter.get("/get-admin-courses",refreshTokensMiddleware, isAuthenticated,authorizeRoles("admin"),  getAdminAllCourses);
 courseRouter.get("/get-course-content/:id",refreshTokensMiddleware, isAuthenticated, getCourseByUser);
 courseRouter.post("/add-question",refreshTokensMiddleware, isAuthenticated, addQuestion);
-courseRouter.put("/add-answer", isAuthenticated, AddAnswer);
+courseRouter.put("/add-answer",refreshTokensMiddleware, isAuthenticated, AddAnswer);
 courseRouter.put("/add-review/:id",refreshTokensMiddleware, isAuthenticated, addReview);  
 courseRouter.put("/add-reply",refreshTokensMiddleware, isAuthenticated,authorizeRoles("admin"), addReplyToReview);  
 courseRouter.get("/get-all-courses",refreshTokensMiddleware, isAuthenticated,authorizeRoles("admin"), getAllCourses);  
