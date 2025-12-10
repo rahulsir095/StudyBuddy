@@ -18,13 +18,16 @@ const ReviewCard: FC<Props> = ({ item }) => {
 
       {/* Top section with avatar + name */}
       <div className="flex items-center gap-4">
-        <Image
-          loader={({ src }) => src}
-          src={item.avatar}
-          alt={item.name}
-          className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full object-cover border border-gray-300 dark:border-slate-600"
-          loading="lazy"
-        />
+        <div className="relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20">
+          <Image
+            loader={({ src }) => src}
+            src={item.avatar}
+            alt={item.name}
+            fill 
+            className="rounded-full object-cover border border-gray-300 dark:border-slate-600"
+            loading="lazy"
+          />
+        </div>
         <div>
           <h5 className="text-lg font-semibold text-gray-900 dark:text-white">
             {item.name}

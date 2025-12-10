@@ -38,7 +38,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     password: {
         type: String,
         required: function () {
-            return !this.isSocialAuth; // Only required if not a social auth user
+            return !this.isSocialAuth; 
         },
         minlength: [8, "Your password must be at least 8 characters long"],
         select: false,
@@ -46,7 +46,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     },
     isSocialAuth: {
         type: Boolean,
-        default: false, // Social auth users will have this as true
+        default: false, 
     },
     avatar: {
         public_id: String,

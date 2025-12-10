@@ -3,7 +3,7 @@ import { IUser } from "../models/user.model";
 import { catchAsyncErrors } from "./catchAsyncErrors";
 import jwt, { JwtPayload, TokenExpiredError } from "jsonwebtoken";
 import ErrorHandler from "../utils/errorHandler";
-import { redis } from "../utils/redis"; // Upstash Redis client
+import { redis } from "../utils/redis"; 
 import { accessTokenOptions, refreshTokenOptions } from "../utils/jwt";
 
 export const isAuthenticated = catchAsyncErrors(

@@ -1,7 +1,6 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 import dotenv from "dotenv";
 import { IUser } from "./user.model";
-import { timeStamp } from "console";
 
 dotenv.config();
 
