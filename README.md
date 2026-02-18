@@ -10,9 +10,9 @@
 
 <h2>Project Screenshots:</h2>
 
-<img src="https://ik.imagekit.io/ay6bdp4tm/Screenshot%202026-02-18%20at%201.57.02%E2%80%AFPM.png" alt="project-screenshot" width="1200" height="150/">
+<img src="https://ik.imagekit.io/ay6bdp4tm/Screenshot%202026-02-18%20at%201.57.02%E2%80%AFPM.png" alt="project-screenshot" width="1200" height="500/">
 
-<img src="https://ik.imagekit.io/ay6bdp4tm/Screenshot%202026-02-18%20at%201.51.17%E2%80%AFPM.png" alt="project-screenshot" width="1200" height="150/">
+<img src="https://ik.imagekit.io/ay6bdp4tm/Screenshot%202026-02-18%20at%201.51.17%E2%80%AFPM.png" alt="project-screenshot" width="1200" height="500/">
 
   
   
