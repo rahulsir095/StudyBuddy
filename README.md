@@ -31,7 +31,7 @@ Here're some of the project's best features:
 <p>1. Clone Repo</p>
 
 ```
-git clone https://github.com/your-username/epichomes.git 
+https://github.com/rahulsir095/StudyBuddy.git
 ```
 
 <p>2. Change Folder to Server</p>
